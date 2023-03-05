@@ -45,7 +45,7 @@ unsigned char* getSetByteArray(unsigned char servo_num, unsigned int microsecond
     microseconds = microseconds * 4;
     
     retval[2] = microseconds & 0x7f;
-    retval[3] = microseconds >> 8 & 0x7f;
+    retval[3] = microseconds >> 7 & 0x7f;
 
     return retval;
 }
@@ -56,9 +56,25 @@ unsigned char* getGetByteArray(unsigned char servo_num) {
     return retval;
 }
 
-// int openDevice(const std::string &path) {
+int openDevice(const std::string &path) {
     // Open the file with C style string name
-    // int fd = open(path.c_str(), O_RDWR | O_NOCTTY);
+    return open(path.c_str(), O_RDWR | O_NOCTTY);
+}
+
+int writeToDevice(int file_descriptor, unsigned char* data) {
+    return write(file_descriptor, data, 4);
+}   
+
+unsigned char* readFromDevice(int file_descriptor, unsigned char* data) {
+    static unsigned char response[] = {0x00, 0x00};
+    int status = write(file_descriptor, data, sizeof(data));
+   
+    if (status != -1) {
+        status = read(file_descriptor, response, 2);
+    }
+
+    return response;
+}
 
 int main(int argc, char** argv) {
     int c;
@@ -66,6 +82,10 @@ int main(int argc, char** argv) {
     unsigned char servo_num = 0;
     int option_index = 0;
     unsigned int microseconds;
+
+    std::string DEVICE_PATH = "/dev/ttyACM0";
+
+    int file_descriptor, status;
 
     static struct option long_options[] = {
         {"value", required_argument, 0, 'v'},
@@ -76,7 +96,7 @@ int main(int argc, char** argv) {
         switch (c) {
             case 's': {
                 servo_num = std::strtoul(optarg, 0, 10) & 0x7f;
-                std::cout << "Servo value: " << std::hex << servo_num << std::endl;
+                std::cout << "Servo value: " << (int)servo_num << std::endl;
                 break;
             }
             case 'v': {
@@ -99,15 +119,36 @@ int main(int argc, char** argv) {
     std::cout << "In microseconds we have: " << microseconds << std::endl;
 
     // Converting the input into quarter-microseconds
-    unsigned char* set_bytes = getSetByteArray(servo_num, microseconds);
-    std::cout << "Setting the servo with the following bytes:";
+    unsigned char* setBytes = getSetByteArray(servo_num, microseconds);
+    std::cout << "Setting the servo with the following bytes:" << std::hex;
 
     for (int i = 0; i < 4; i++) {
-        std::cout << " " << set_bytes[i];
+        std::cout << " " << (int)setBytes[i];
     }
     
     std::cout << std::endl;
 
-    return 1;
+    // Open the device
+    file_descriptor = openDevice(DEVICE_PATH);
+    if (file_descriptor == -1) {
+        perror("Error opening the device.");
+        return 1;
+    }
+
+
+    // Send your bytes to the device
+    status = writeToDevice(file_descriptor, setBytes);
+    if (status == -1) {
+        perror("Error writing bytes to the file.");
+        return 1;
+    }
+
+    // Read bytes from the device
+    unsigned char* readBytes = getGetByteArray(servo_num);
+    unsigned char* response = readFromDevice(file_descriptor, readBytes);
+    std::cout << "Response from the device: "<< std::hex << (int)response[0] 
+    << " " << (int)response[1] << std::endl;
+    
+    return 0;
 }
 
