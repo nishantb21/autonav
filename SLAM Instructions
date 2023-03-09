@@ -1,3 +1,11 @@
+Dependencies to install:
+
+- phidget_drivers
+- realsense2_camera
+- imu_filter_magwick
+- rtbmap_ros
+- robot_localization
+
 Terminal Commands:
 
 roscore
