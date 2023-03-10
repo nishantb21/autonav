@@ -18,6 +18,10 @@
 #include <algorithm>
 #include <string>
 
+#include "ros/ros.h"
+#include "std_msgs/Float32.h"
+
+int file_descriptor = -1;
 
 unsigned int convertInputToMicroseconds(float input) {
     unsigned int retval = 0;
@@ -76,79 +80,63 @@ unsigned char* readFromDevice(int file_descriptor, unsigned char* data) {
     return response;
 }
 
-int main(int argc, char** argv) {
-    int c;
-    float value = 0.0f;
-    unsigned char servo_num = 0;
-    int option_index = 0;
+void callback(const std_msgs::Float32 steering_angle) {
+    std::cout << "Received steering angle: " << steering_angle.data << std::endl;
+    
+    float value = steering_angle.data;
+    unsigned char SERVO_NUM = 0; // TODO: Change this to a ros parameter instead
+    int status;
     unsigned int microseconds;
 
-    std::string DEVICE_PATH = "/dev/ttyACM0";
-
-    int file_descriptor, status;
-
-    static struct option long_options[] = {
-        {"value", required_argument, 0, 'v'},
-        {"servo", required_argument, 0, 's'}
-    }; 
-
-    while ((c = getopt_long(argc, argv, "v:s:", long_options, &option_index)) != -1) {
-        switch (c) {
-            case 's': {
-                servo_num = std::strtoul(optarg, 0, 10) & 0x7f;
-                std::cout << "Servo value: " << (int)servo_num << std::endl;
-                break;
-            }
-            case 'v': {
-                value = std::stof(optarg);
-                std::cout << "Value received: " << optarg << std::endl;
-                break;
-            }
-            case '?': {
-                std::cout << "Got unexpected argument. Ignoring ..." << std::endl;
-                break;
-            }
-            default:
-                std::cout << "Got unexpected case." << std::endl;
-
-        }
-    } 
-
-    // Converting the input into microseconds 
     microseconds = convertInputToMicroseconds(value);
     std::cout << "In microseconds we have: " << microseconds << std::endl;
 
     // Converting the input into quarter-microseconds
-    unsigned char* setBytes = getSetByteArray(servo_num, microseconds);
+    unsigned char* setBytes = getSetByteArray(SERVO_NUM, microseconds);
     std::cout << "Setting the servo with the following bytes:" << std::hex;
 
     for (int i = 0; i < 4; i++) {
         std::cout << " " << (int)setBytes[i];
     }
-    
+
     std::cout << std::endl;
-
-    // Open the device
-    file_descriptor = openDevice(DEVICE_PATH);
-    if (file_descriptor == -1) {
-        perror("Error opening the device.");
-        return 1;
-    }
-
 
     // Send your bytes to the device
     status = writeToDevice(file_descriptor, setBytes);
     if (status == -1) {
         perror("Error writing bytes to the file.");
-        return 1;
     }
 
     // Read bytes from the device
-    unsigned char* readBytes = getGetByteArray(servo_num);
-    unsigned char* response = readFromDevice(file_descriptor, readBytes);
-    std::cout << "Response from the device: "<< std::hex << (int)response[0] 
-    << " " << (int)response[1] << std::endl;
-    
-    return 0;
+    // unsigned char* readBytes = getGetByteArray(SERVO_NUM);
+    // unsigned char* response = readFromDevice(file_descriptor, readBytes);
+
+    // TODO: The higher order bits are shifted by 1. Fix this bug
+    // std::cout << "Response from the device: "<< std::hex << (int)response[0]
+    // << " " << (int)response[1] << std::endl;
+}
+
+int main(int argc, char** argv) {
+    std::string DEVICE_PATH = "/dev/ttyACM0";
+    int status;
+
+    std::cout << "Waiting for the servo controller to be ready ..." << std::endl;
+
+    // Open the device until a valid file descriptor is returned
+    while (file_descriptor == -1) {
+        sleep(1);
+        file_descriptor = openDevice(DEVICE_PATH);
+    }
+
+    std::cout << "Device is ready ..." << std::endl;
+
+    ros::init(argc, argv, "keyboard_interface");
+    ros::NodeHandle nh;
+
+    ros::Subscriber sub = nh.subscribe("/servo_cmds", 10, callback);
+    std::cout << "Waiting for new messages to come in ...";
+
+    ros::spin();
+
 }
 
