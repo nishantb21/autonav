@@ -1,3 +1,4 @@
+
 /* 
     This is a sample program to set the controller values. Written in C++
     because we want to potentially write publishers amd subscribers in roscpp.
@@ -130,10 +131,10 @@ int main(int argc, char** argv) {
 
     std::cout << "Device is ready ..." << std::endl;
 
-    ros::init(argc, argv, "keyboard_interface");
+    ros::init(argc, argv, "servo_interface");
     ros::NodeHandle nh;
 
-    ros::Subscriber sub = nh.subscribe("/servo_cmds", 10, callback);
+    ros::Subscriber sub = nh.subscribe("/servo_raw", 10, callback);
     std::cout << "Waiting for new messages to come in ...";
 
     ros::spin();
