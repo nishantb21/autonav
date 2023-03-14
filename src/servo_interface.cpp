@@ -20,6 +20,7 @@
 #include <string>
 
 #include "ros/ros.h"
+#include "ros/console.h"
 #include "std_msgs/Float32.h"
 #include "std_msgs/UInt32.h"
 
@@ -91,17 +92,17 @@ void callback(const std_msgs::UInt32 steering_PWM) {
     unsigned int microseconds;
 
     microseconds = steering_PWM.data;
-    std::cout << "In microseconds we have: " << microseconds << std::endl;
+    ROS_DEBUG("In microseconds we have: %u", microseconds);
 
     // Converting the input into quarter-microseconds
     unsigned char* setBytes = getSetByteArray(SERVO_NUM, microseconds);
-    std::cout << "Setting the servo with the following bytes:" << std::hex;
+    ROS_DEBUG("Setting the servo #%u with the following bytes: %x %x %x %x", SERVO_NUM, setBytes[0], setBytes[1], setBytes[2], setBytes[2]);
 
-    for (int i = 0; i < 4; i++) {
-        std::cout << " " << (int)setBytes[i];
-    }
+    // for (int i = 0; i < 4; i++) {
+    //     std::cout << " " << (int)setBytes[i];
+    // }
 
-    std::cout << std::endl;
+    // std::cout << std::endl;
 
     // Send your bytes to the device
     status = writeToDevice(file_descriptor, setBytes);
@@ -120,9 +121,12 @@ void callback(const std_msgs::UInt32 steering_PWM) {
 
 int main(int argc, char** argv) {
     std::string DEVICE_PATH = "/dev/ttyACM0";
+    std::string NODE_NAME = "servo_interface";
     int status;
 
-    std::cout << "Waiting for the servo controller to be ready ..." << std::endl;
+    
+    // std::cout << "Waiting for the servo controller to be ready ..." << std::endl;
+    ROS_INFO("Waiting for the servo controller to be ready ...");
 
     // Open the device until a valid file descriptor is returned
     while (file_descriptor == -1) {
@@ -130,13 +134,14 @@ int main(int argc, char** argv) {
         file_descriptor = openDevice(DEVICE_PATH);
     }
 
-    std::cout << "Device is ready ..." << std::endl;
+    //std::cout << "Device is ready ..." << std::endl;
+    ROS_INFO("Device is ready ...");
 
-    ros::init(argc, argv, "servo_interface");
+    ros::init(argc, argv, NODE_NAME);
     ros::NodeHandle nh;
 
     ros::Subscriber sub = nh.subscribe("/servo_raw", 10, callback);
-    std::cout << "Waiting for new messages to come in ...";
+    ROS_INFO("Waiting for new messages to come in ...");
 
     ros::spin();
 

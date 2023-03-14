@@ -15,10 +15,10 @@
 #include <termios.h>
 #include <assert.h>
 #include <errno.h>
-#include <algorithm>
 #include <string>
 
 #include "ros/ros.h"
+#include "ros/console.h"
 #include "std_msgs/UInt32.h"
 #include "sensor_msgs/Joy.h"
 
@@ -76,7 +76,8 @@ class JoystickTranslator {
 };
 
 int main(int argc, char** argv) {
-    std::cout << "Translating joystick inputs to PWM values ..." << std::endl;
+    ROS_INFO("Ceiling: %d, Floor: %d", HIGH_SERVO, LOW_SERVO);
+    ROS_INFO("Translating joystick inputs to PWM values ...");
 
     ros::init(argc, argv, "joystick_translator");
 
