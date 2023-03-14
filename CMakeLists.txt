@@ -135,6 +135,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/autonav_node.cpp)
 add_executable(servo_interface src/servo_interface.cpp)
+add_executable(motor_interface src/motor_interface.cpp)
+add_executable(joystick_translator src/joystick_translator.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -151,6 +153,8 @@ add_executable(servo_interface src/servo_interface.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(servo_interface ${catkin_LIBRARIES})
+target_link_libraries(motor_interface ${catkin_LIBRARIES})
+target_link_libraries(joystick_translator ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -165,7 +169,7 @@ target_link_libraries(servo_interface ${catkin_LIBRARIES})
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
-catkin_install_python(PROGRAMS scripts/talker.py scripts/keyboard_input.py
+catkin_install_python(PROGRAMS scripts/talker.py scripts/keyboard_input.py scripts/motor_talker.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}}
 )
 

@@ -86,7 +86,7 @@ void callback(const std_msgs::UInt32 steering_PWM) {
     std::cout << "Received steering PWM: " << steering_PWM.data << std::endl;
     
     // float value = steering_angle.data;
-    unsigned char SERVO_NUM = 0; // TODO: Change this to a ros parameter instead
+    unsigned char SERVO_NUM = 1; // TODO: Change this to a ros parameter instead
     int status;
     unsigned int microseconds;
 
@@ -132,10 +132,10 @@ int main(int argc, char** argv) {
 
     std::cout << "Device is ready ..." << std::endl;
 
-    ros::init(argc, argv, "servo_interface");
+    ros::init(argc, argv, "motor_interface");
     ros::NodeHandle nh;
 
-    ros::Subscriber sub = nh.subscribe("/servo_raw", 10, callback);
+    ros::Subscriber sub = nh.subscribe("/velocity_raw", 10, callback);
     std::cout << "Waiting for new messages to come in ...";
 
     ros::spin();

@@ -27,26 +27,32 @@ class JoystickTranslator {
         ros::NodeHandle nodeHandler;
         ros::Publisher steering_publisher;
         ros::Publisher velocity_publisher;
+    
+        int LOW_SERVO = 1000;
+        int HIGH_SERVO = 2000;
+        int MID_SERVO = 0;
+        int SERVO_RANGE = 0;
 
     public:
         JoystickTranslator() {
         }
 
         void callback(const sensor_msgs::Joy::ConstPtr& msg) {
+            // TODO: Stop gap solution. Figure out why the negative sign is needed
             // Get the current value of the steering axis
-            float steering_axis_value = msg->axes[3];
+            float steering_axis_value = -(msg->axes[3]);
 
             // Get the current value of the velocity axis
-            float velocity_axis_value = msg->axes[5];
+            float velocity_axis_value = msg->axes[1];
             
-            unsigned int steering_raw_value = (unsigned int) steering_axis_value;
-            unsigned int velocity_raw_value = (unsigned int) velocity_axis_value;
+            unsigned int steering_raw_value = (unsigned int) ((steering_axis_value * SERVO_RANGE) + MID_SERVO);
+            unsigned int velocity_raw_value = (unsigned int) ((velocity_axis_value * SERVO_RANGE) + MID_SERVO);
 
             std_msgs::UInt32 steering_msg;
-            steering_msg->data = steering_raw_value;
+            steering_msg.data = steering_raw_value;
             
-            std_msgs:UInt32 velocity_msg;
-            velocity_msg->data = velocity_raw_value;
+            std_msgs::UInt32 velocity_msg;
+            velocity_msg.data = velocity_raw_value;
 
             // Send the message
             steering_publisher.publish(steering_msg);            
@@ -55,15 +61,19 @@ class JoystickTranslator {
         }
 
         int main(int argc, char** argv) {
+            SERVO_RANGE = (HIGH_SERVO - LOW_SERVO) / 2;
+            MID_SERVO = LOW_SERVO + SERVO_RANGE;
+
             ros::Subscriber subscriber; 
             subscriber = nodeHandler.subscribe("joy", 10, &JoystickTranslator::callback, this);
-            publisher = nodeHandler.advertise<std_msgs::UInt32>("servo_raw", 1);
+            steering_publisher = nodeHandler.advertise<std_msgs::UInt32>("servo_raw", 1);
+            velocity_publisher = nodeHandler.advertise<std_msgs::UInt32>("velocity_raw", 1);
             
 
-            ros.spin();
+            ros::spin();
             return 1;
         }
-}
+};
 
 int main(int argc, char** argv) {
     std::cout << "Translating joystick inputs to PWM values ..." << std::endl;
@@ -72,6 +82,6 @@ int main(int argc, char** argv) {
 
     JoystickTranslator jt;
 
-    return jt.main();
+    return jt.main(argc, argv);
 }
 

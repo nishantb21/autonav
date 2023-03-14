@@ -1,0 +1,6 @@
+<launch>
+    <node name="joy_node" pkg="joy" type="joy_node" output="screen" />
+    <node name="joystick_translator" pkg="autonav" type="joystick_translator" output="screen"/>
+    <node name="servo_interface" pkg="autonav" type="servo_interface" output="screen"/>
+    <node name="motor_interface" pkg="autonav" type="motor_interface" output="screen"/>
+</launch>
