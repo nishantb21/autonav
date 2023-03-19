@@ -165,12 +165,12 @@ target_link_libraries(joystick_translator ${catkin_LIBRARIES})
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-catkin_install_python(PROGRAMS scripts/talker.py scripts/keyboard_input.py scripts/motor_talker.py
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}}
+install(PROGRAMS
+  src/open_loop
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+catkin_install_python(PROGRAMS scripts/talker.py scripts/keyboard_input.py scripts/motor_talker.py src/open_loop.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Mark executables and/or libraries for installation
