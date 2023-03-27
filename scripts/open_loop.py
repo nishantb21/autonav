@@ -22,7 +22,7 @@ if __name__ == '__main__':
         pub = rospy.Publisher('velocity_raw', UInt32, queue_size=10)
         while True:
             pub.publish(1500)
-            duration = 0.5
+            duration = 2
             PWM = input("enter PWM: ")
             talker(PWM,duration)
 

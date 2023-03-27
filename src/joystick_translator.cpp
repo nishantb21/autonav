@@ -35,6 +35,8 @@ class JoystickTranslator {
 
     public:
         JoystickTranslator() {
+            ros::param::get("/velocty_upper", HIGH_SERVO);
+
         }
 
         void callback(const sensor_msgs::Joy::ConstPtr& msg) {

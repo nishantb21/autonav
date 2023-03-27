@@ -1,4 +1,5 @@
 <launch>
+    <param name="velocity_upper" type="int" value="1700" />
     <node name="joy_node" pkg="joy" type="joy_node" output="screen" />
     <node name="joystick_translator" pkg="autonav" type="joystick_translator" output="screen"/>
     <node name="servo_interface" pkg="autonav" type="servo_interface" output="screen"/>
