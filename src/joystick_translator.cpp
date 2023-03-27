@@ -33,10 +33,13 @@ class JoystickTranslator {
         int MID_SERVO = 0;
         int SERVO_RANGE = 0;
 
+        int LOW_MOTOR = 1000;
+        int HIGH_MOTOR = 2000;
+        int MID_MOTOR = 1500;
+        int MOTOR_RANGE = 0;
+
     public:
         JoystickTranslator() {
-            ros::param::get("/velocty_upper", HIGH_SERVO);
-
         }
 
         void callback(const sensor_msgs::Joy::ConstPtr& msg) {
@@ -48,7 +51,7 @@ class JoystickTranslator {
             float velocity_axis_value = msg->axes[1];
             
             unsigned int steering_raw_value = (unsigned int) ((steering_axis_value * SERVO_RANGE) + MID_SERVO);
-            unsigned int velocity_raw_value = (unsigned int) ((velocity_axis_value * SERVO_RANGE) + MID_SERVO);
+            unsigned int velocity_raw_value = (unsigned int) ((velocity_axis_value * MOTOR_RANGE) + MID_MOTOR);
 
             std_msgs::UInt32 steering_msg;
             steering_msg.data = steering_raw_value;
@@ -65,6 +68,9 @@ class JoystickTranslator {
         int main(int argc, char** argv) {
             SERVO_RANGE = (HIGH_SERVO - LOW_SERVO) / 2;
             MID_SERVO = LOW_SERVO + SERVO_RANGE;
+
+            ros::param::get("/velocity_upper", HIGH_MOTOR);
+            MOTOR_RANGE = (HIGH_MOTOR - MID_MOTOR);
 
             ros::Subscriber subscriber; 
             subscriber = nodeHandler.subscribe("joy", 10, &JoystickTranslator::callback, this);
