@@ -26,27 +26,28 @@
 class JoystickTranslator {
     private:
         ros::NodeHandle nodeHandler;
-        ros::Publisher steering_publisher;
-        ros::Publisher velocity_publisher;
-    
-        int LOW_SERVO = 1000;
-        int HIGH_SERVO = 2000;
-        int MID_SERVO = 0;
-        int SERVO_RANGE = 0;
-
-        int LOW_MOTOR = 1000;
-        int HIGH_MOTOR = 2000;
-        int MID_MOTOR = 1500;
-        int MOTOR_RANGE = 0;
+        pid_t c_pid = -1;
 
     public:
         JoystickTranslator() {
         }
 
         void callback(const sensor_msgs::Joy::ConstPtr& msg) {
-            // TODO: Stop gap solution. Figure out why the negative sign is needed
-            // Get the current value of the steering axis
-            float steering_axis_value = -(msg->axes[3]);
+            int start = msg->buttons[2];
+            int end = msg->buttons[1];
+
+            if (c_pid == -1) {
+                c_pid = fork();
+
+                if (c_pid > 0) {
+		// Parent
+		}
+
+		else {
+		    exec();
+                }
+
+            }
 
             // Get the current value of the velocity axis
             float velocity_axis_value = msg->axes[1];

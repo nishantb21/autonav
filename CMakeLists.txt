@@ -137,6 +137,7 @@ include_directories(
 add_executable(servo_interface src/servo_interface.cpp)
 add_executable(motor_interface src/motor_interface.cpp)
 add_executable(joystick_translator src/joystick_translator.cpp)
+add_executable(ir_node src/ir_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,6 +156,7 @@ add_executable(joystick_translator src/joystick_translator.cpp)
 target_link_libraries(servo_interface ${catkin_LIBRARIES})
 target_link_libraries(motor_interface ${catkin_LIBRARIES})
 target_link_libraries(joystick_translator ${catkin_LIBRARIES})
+target_link_libraries(ir_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##
