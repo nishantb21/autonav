@@ -1,0 +1,5 @@
+<launch>
+    <node name="autonav" pkg="autonav" name="Autonav">
+    <node name="depth_follow_controller" pkg="autonav" name="DepthFollowController">
+    <node name="stop_sign_detection" pkg="autonav" name="StopSignDetection">
+</launch>
