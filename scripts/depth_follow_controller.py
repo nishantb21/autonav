@@ -13,7 +13,7 @@ class DepthFollowController:
         self.image_sub = rospy.Subscriber('/camera/depth/image_rect_raw', Image, self.depth_image_callback)
         self.color_image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.color_image_callback)
         self.PID_sub = rospy.Subscriber('/servo_raw', UInt32, self.PID_output_callback)
-        self.error_pub = rospy.Publisher('/steering_error', Float64, queue_size=10)
+        self.error_pub = rospy.Publisher('/depth_controller_error', Float64, queue_size=10)
         self.error = 0
         self.depth_image = None
         self.color_image = None

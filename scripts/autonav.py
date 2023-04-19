@@ -5,13 +5,17 @@ import numpy as np
 import time
 import math
 from simple_pid import PID
+import sys
+from select import select
+import termios
+import tty
 
 max_speed = 0.55
 
 class Autonav:
     def __init__(self):
         rospy.init_node('autonav')
-        self.steering_error = rospy.Subscriber('/steering_error', Float64, self.steering_angle_callback)
+        self.steering_error = rospy.Subscriber('/depth_controller_error', Float64, self.steering_angle_callback)
         self.ir_sensor = rospy.Subscriber('/ir_raw', UInt32, self.ir_sensor_callback)
         self.stop_sign = rospy.Subscriber('/stop_sign', Bool, self.stop_sign_callback)
         self.steering_input = rospy.Publisher('/servo_raw', UInt32, queue_size=10)
@@ -25,12 +29,23 @@ class Autonav:
         self.start = False
 
         self.velocity_input.publish(UInt32(1500))
-        self.steering_input.publish(UInt32(1500))    
-        t_end = time.time() + 60 * 0.05
-        while time.time() < t_end:
+        self.steering_input.publish(UInt32(1500))  
+
+        settings = self.saveTerminalSettings()
+        key_timeout = rospy.get_param("~key_timeout", 0.5)
+
+        t_end = time.time() + 60 * 0.25
+
+        while (time.time() < t_end):
             self.steering_input.publish(UInt32(1500))
             self.velocity_input.publish(UInt32(1500))
+            rospy.loginfo('waiting...')
+            key = self.getKey(settings, key_timeout)
+            if (key == 'a'):
+                rospy.loginfo('a was pressed')
+                break
 
+        rospy.loginfo('done')
         self.start = True
 
     def steering_angle_callback(self, data):
@@ -51,16 +66,14 @@ class Autonav:
 
             self.velocity_input.publish(UInt32(1550))
             rospy.loginfo('FORWARD!!')
-            '''
+            
             if (self.stop_sign):
                 self.velocity_input.publish(UInt32(1500))
             else:
                 self.velocity_input.publish(UInt32(1550))
-            '''
+            
 
     def ir_sensor_callback(self, data):
-        
-        #rospy.loginfo('IR data: {}'.format(data.data))
         if ((data.data < 200) and (data.data > 0)):
             self.turn = True
         else:
@@ -72,6 +85,20 @@ class Autonav:
             self.stop_sign = True
         else:
             self.stop_sign = False
+
+    def getKey(self, settings, timeout):
+        tty.setraw(sys.stdin.fileno())
+        # sys.stdin.read() returns a string on Linux
+        rlist, _, _ = select([sys.stdin], [], [], timeout)
+        if rlist:
+            key = sys.stdin.read(1)
+        else:
+            key = ''
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+        return key
+    
+    def saveTerminalSettings(self):
+        return termios.tcgetattr(sys.stdin)
 
 if __name__ == '__main__':
     try:

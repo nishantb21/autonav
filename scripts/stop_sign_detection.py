@@ -9,11 +9,13 @@ import numpy as np
 
 class StopSignDetector():
 	def __init__(self):
-		self.is_detected = Bool()
-		self.color_image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.color_image_callback)
-		self.publisher = rospy.Publisher('/stop_sign', Bool, queue_size=1)
 		rospy.init_node('stop_sign_detctor')
 		self.bridge = CvBridge()
+
+		self.color_image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.color_image_callback)
+		self.publisher = rospy.Publisher('/stop_sign', Bool, queue_size=1)
+
+		self.is_detected = Bool()
 
 	def color_image_callback(self,data):
 		# Load the image file
@@ -43,13 +45,12 @@ class StopSignDetector():
 				# If an octagon is found, return True
 				rospy.loginfo("Detected?: {}".format(True))
 				self.is_detected.data = Bool(True)
-				rospy.loginfo("Error difference: {}".format(self.error))
 				self.publisher.publish(self.is_detected)
 				break
 		else:
 			# If no octagon isrospy.loginfo("Error difference: {}".format(self.error)) found, return False
 			rospy.loginfo("Detected?: {}".format(False))
-			self.is_detected.data = Bool(False)
+			self.is_detected = Bool(False)
 			self.publisher.publish(self.is_detected)
 
 if __name__=='__main__':
