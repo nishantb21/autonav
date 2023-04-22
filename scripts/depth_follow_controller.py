@@ -84,7 +84,7 @@ class DepthFollowController:
         # Show the image
         cv2.imshow('Depth Follow Controller', color_image)
         cv2.waitKey(1)
-    
+
     def PID_output_callback(self, data):
         PID_raw = data.data
         rospy.loginfo("Servo output: {}".format(data.data))
