@@ -11,9 +11,9 @@ class DepthFollowController:
         rospy.init_node('depth_follow_controller')
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/depth/image_rect_raw', Image, self.depth_image_callback)
-        self.color_image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.color_image_callback)
-        self.PID_sub = rospy.Subscriber('/servo_raw', UInt32, self.PID_output_callback)
-        self.error_pub = rospy.Publisher('/depth_controller_error', Float64, queue_size=10)
+        #self.color_image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.color_image_callback)
+        #self.PID_sub = rospy.Subscriber('/servo_raw', UInt32, self.PID_output_callback)
+        self.error_pub = rospy.Publisher('/steering_error', Float64, queue_size=10)
         self.error = 0
         self.depth_image = None
         self.color_image = None
@@ -56,7 +56,7 @@ class DepthFollowController:
         else:
             rospy.logwarn("No white shape found in the image")
             rospy.Publish(Float64(0.5))
-    
+    '''
     def color_image_callback(self, data):
         color_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
         self.color_image = color_image
@@ -90,7 +90,7 @@ class DepthFollowController:
         rospy.loginfo("Servo output: {}".format(data.data))
         self.PID_output = (float(PID_raw) -1000.0) / 1000.0
         rospy.loginfo("PID output: {}".format(self.PID_output))
-    
+    '''
 
 if __name__ == '__main__':
     try:

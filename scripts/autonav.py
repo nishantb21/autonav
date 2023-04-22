@@ -66,12 +66,11 @@ class Autonav:
 
             self.velocity_input.publish(UInt32(1550))
             rospy.loginfo('FORWARD!!')
-            
+
             if (self.stop_sign):
                 self.velocity_input.publish(UInt32(1500))
             else:
                 self.velocity_input.publish(UInt32(1550))
-            
 
     def ir_sensor_callback(self, data):
         if ((data.data < 200) and (data.data > 0)):
