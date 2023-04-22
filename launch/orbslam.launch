@@ -4,6 +4,6 @@
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
 
     <!-- Call URDF links -->
-    <param name="robot_description" command="cat $(find my_robot)/urdf/autonav_bot.urdf" />
+    <param name="robot_description" command="cat $(find autonav)/urdf/autonav_bot.urdf" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 </launch>
