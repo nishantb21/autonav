@@ -170,7 +170,7 @@ target_link_libraries(ir_node ${catkin_LIBRARIES})
 install(PROGRAMS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-catkin_install_python(PROGRAMS scripts/talker.py scripts/keyboard_input.py scripts/motor_talker.py scripts/open_loop.py
+catkin_install_python(PROGRAMS scripts/talker.py scripts/keyboard_input.py scripts/motor_talker.py scripts/open_loop.py scripts/autonav.py scripts/depth_follow_controller.py scripts/stop_sign_detection.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -2,6 +2,8 @@
 import rospy
 from std_msgs.msg import UInt32,Float64,Bool
 import numpy as np
+import time
+import math
 from simple_pid import PID
 
 max_speed = 0.55
@@ -12,35 +14,58 @@ class Autonav:
         self.steering_error = rospy.Subscriber('/steering_error', Float64, self.steering_angle_callback)
         self.ir_sensor = rospy.Subscriber('/ir_raw', UInt32, self.ir_sensor_callback)
         self.stop_sign = rospy.Subscriber('/stop_sign', Bool, self.stop_sign_callback)
-        self.steering_input = rospy.Publisher('servo_raw', UInt32, queue_size=10)
-        self.velocity_input = rospy.Publisher('velocity_raw', UInt32, queue_size=10)
-        self.steering_pid = PID(1.0, 0.1, 0.5, setpoint=0.5)
-        self.steering_pid.output_limits = (0.0, 1.0)
+        self.steering_input = rospy.Publisher('/servo_raw', UInt32, queue_size=10)
+        self.velocity_input = rospy.Publisher('/velocity_raw', UInt32, queue_size=10)
+        self.steering_pid = PID(1.2, 0.25, 0.03, setpoint=0)
+        self.steering_pid.output_limits = (-500, 500)
+        self.steering_pid.sample_time = 0.05
+        self.last_input = 1500
         self.turn = False
         self.stop_sign = False
+        self.start = False
+
+        self.velocity_input.publish(UInt32(1500))
+        self.steering_input.publish(UInt32(1500))    
+        t_end = time.time() + 60 * 0.25
+        while time.time() < t_end:
+            self.steering_input.publish(UInt32(1500))
+            self.velocity_input.publish(UInt32(1500))
+
+        self.start = True
 
     def steering_angle_callback(self, data):
-        self.control = data.data
-        #self.control = self.steering_pid(float(data.data))
-        #rospy.loginfo('raw data: {}'.format(data.data))
-        if self.turn:
-            self.steering_input.publish(UInt32(1))
-            rospy.loginfo('TURN!!')
-        else:
-            self.steering_input.publish(UInt32(self.control))
-            rospy.loginfo('steering input: {}'.format(self.control))
-        
-        if (self.stop_sign):
-            self.velocity_input.publish(UInt32(0.5))
-        else:
-            self.velocity_input.publish(UInt32(0.55))
+        if (self.start):
+            rospy.loginfo('errort: {}'.format((data.data*1000 + 1000) - 1500.0))
+            rospy.loginfo('last inout: {}'.format(self.last_input))
+            control = self.steering_pid((data.data*1000 + 1000) - 1500.0)
+            rospy.loginfo('controller output: {}'.format(control))
+            self.last_input = control
+            if self.turn:
+                self.steering_input.publish(UInt32(1700))
+                rospy.loginfo('TURN!!')
+            else:
+                PWM = 1500.0 - control
+                rospy.loginfo('command sent: {}'.format(PWM))
+                self.steering_input.publish(UInt32(PWM))
+                #rospy.loginfo('steering input: {}'.format(PWM))
+
+            self.velocity_input.publish(UInt32(1550))
+            rospy.loginfo('FORWARD!!')
+            '''
+            if (self.stop_sign):
+                self.velocity_input.publish(UInt32(1500))
+            else:
+                self.velocity_input.publish(UInt32(1550))
+            '''
 
     def ir_sensor_callback(self, data):
+        
         #rospy.loginfo('IR data: {}'.format(data.data))
-        if (data.data < 200):
+        if ((data.data < 200) and (data.data > 0)):
             self.turn = True
         else:
             self.turn = False
+        
 
     def stop_sign_callback(self, data):
         if (data.data):

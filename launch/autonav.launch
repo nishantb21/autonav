@@ -1,5 +1,13 @@
 <launch>
-    <node name="autonav" pkg="autonav" name="Autonav">
-    <node name="depth_follow_controller" pkg="autonav" name="DepthFollowController">
-    <node name="stop_sign_detection" pkg="autonav" name="StopSignDetection">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+         <!--<arg name="align_depth" value="true"/>-->
+         <arg name="initial_reset" value="true"/>
+    </include>
+
+    <param name="velocity_upper" type="int" value="1550" />s
+    <node name="servo_interface" pkg="autonav" type="servo_interface" output="screen"/>
+    <node name="motor_interface" pkg="autonav" type="motor_interface" output="screen"/>
+    <node name="ir_node" pkg="autonav" type="ir_node" output="screen"/>
+    <node name="autonav" pkg="autonav" type="autonav.py" output="screen"/>
+    <node name="depth_follow_controller" pkg="autonav" type="depth_follow_controller.py" output="screen"/>
 </launch>

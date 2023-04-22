@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import rospy
 from sensor_msgs.msg import Image
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, UInt32
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
-import numpy as npmage
+import numpy as np
 
 class DepthFollowController:
     def __init__(self):
@@ -12,11 +12,13 @@ class DepthFollowController:
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/depth/image_rect_raw', Image, self.depth_image_callback)
         #self.color_image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.color_image_callback)
+        #self.PID_sub = rospy.Subscriber('/servo_raw', UInt32, self.PID_output_callback)
         self.error_pub = rospy.Publisher('/steering_error', Float64, queue_size=10)
         self.error = 0
         self.depth_image = None
         self.color_image = None
         self.center_of_mass = None
+        self.PID_output = None
     
     def depth_image_callback(self, data):
         depth_image = self.bridge.imgmsg_to_cv2(data, "16UC1")
@@ -77,10 +79,17 @@ class DepthFollowController:
         center_of_image = (int(w / 2), int(h / 2))
         cv2.line(color_image, (center_of_mass[0], 0), (center_of_mass[0], h), (0, 255, 0), 2)
         cv2.line(color_image, (center_of_image[0], 0), (center_of_image[0], h), (0, 0, 255), 2)
+        cv2.line(color_image, (int(self.PID_output*w), 0), (int(self.PID_output*w), h), (255, 0, 0), 2)
 
         # Show the image
         cv2.imshow('Depth Follow Controller', color_image)
         cv2.waitKey(1)
+    
+    def PID_output_callback(self, data):
+        PID_raw = data.data
+        rospy.loginfo("Servo output: {}".format(data.data))
+        self.PID_output = (float(PID_raw) -1000.0) / 1000.0
+        rospy.loginfo("PID output: {}".format(self.PID_output))
     '''
 
 if __name__ == '__main__':
