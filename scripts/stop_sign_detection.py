@@ -50,7 +50,7 @@ class StopSignDetector():
 		else:
 			# If no octagon isrospy.loginfo("Error difference: {}".format(self.error)) found, return False
 			rospy.loginfo("Detected?: {}".format(False))
-			self.is_detected.data = Bool(False)
+			self.is_detected = Bool(False)
 			self.publisher.publish(self.is_detected)
 
 if __name__=='__main__':

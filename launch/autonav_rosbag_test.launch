@@ -1,0 +1,8 @@
+<launch>
+    <node name="autonav" pkg="autonav" type="autonav.py" output="screen"/>
+    <node name="depth_follow_controller" pkg="autonav" type="depth_follow_controller.py" output="screen"/>
+    <node name="stop_sign_detection" pkg="autonav" type="stop_sign_detection.py" output="screen"/>
+    <node name="hallway_convergence_controller" pkg="autonav" type="hallway_convergence_controller.py" output="screen"/>
+    <node name="ball_detection" pkg="autonav" type="ball_detection.py" output="screen"/>
+    <node name="control_visualizer" pkg="autonav" type="control_visualizer.py" output="screen"/>
+</launch>
