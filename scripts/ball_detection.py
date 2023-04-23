@@ -42,7 +42,7 @@ class BallDetector():
 
 		if circles is not None:
 			# If a circle is found, return True
-			rospy.loginfo("Detected?: {}".format(True))
+			#rospy.loginfo("Detected?: {}".format(True))
 			self.is_detected.data = Bool(True)
 			self.ball_detected.publish(self.is_detected)
 			
@@ -56,13 +56,13 @@ class BallDetector():
 			# # Calculate the error difference in the x-direction only
 			self.error = self.center_of_mass[0] - center_of_image[0]
 			# # Print the error difference
-			rospy.loginfo("Error difference: {}".format(self.error))
+			#rospy.loginfo("Error difference: {}".format(self.error))
 			output_error = float((float(self.error)/float(w)))+0.5
 			self.ball_location.publish(Float64(output_error))
-			rospy.loginfo("Error output: {}".format(output_error))
+			#rospy.loginfo("Error output: {}".format(output_error))
 		else:
 			# If no circle is found, return False
-			rospy.loginfo("Detected?: {}".format(False))
+			#rospy.loginfo("Detected?: {}".format(False))
 			self.is_detected = Bool(False)
 			self.ball_detected.publish(self.is_detected)
 

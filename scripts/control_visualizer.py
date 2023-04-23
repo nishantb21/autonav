@@ -65,15 +65,15 @@ class Visualize:
 		cv2.putText(color_image, text= str('Car Center'), org=(center_of_image[0], 10),
 	    	fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
             thickness=2, lineType=cv2.LINE_AA)
-		#cv2.line(color_image, (int(self.PID_output*w), 0), (int(self.PID_output*w), h), (255, 255, 255), 2)
-		#cv2.putText(color_image, text= str('PID'), org=(int(self.PID_output*w), 150),
-	    #	fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
-        #    thickness=2, lineType=cv2.LINE_AA)
-		avg = int((depth_line + convergence_line)/2)
-		cv2.line(color_image, (avg, 0), (avg, h), (255, 255, 255), 2)
-		cv2.putText(color_image, text= str('PID'), org=(avg, 150),
+		cv2.line(color_image, (int(self.PID_output*w), 0), (int(self.PID_output*w), h), (255, 255, 255), 2)
+		cv2.putText(color_image, text= str('PID'), org=(int(self.PID_output*w), 150),
 	    	fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
             thickness=2, lineType=cv2.LINE_AA)
+		#avg = int((depth_line + convergence_line)/2)
+		#cv2.line(color_image, (avg, 0), (avg, h), (255, 255, 255), 2)
+		#cv2.putText(color_image, text= str('PID'), org=(avg, 150),
+	    #	fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
+        #    thickness=2, lineType=cv2.LINE_AA)
 
 		# Show the image
 		cv2.imshow('Depth Follow Controller', color_image)

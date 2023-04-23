@@ -43,13 +43,13 @@ class StopSignDetector():
 			approx = cv2.approxPolyDP(contour, cv2.arcLength(contour, True) * 0.01, True)
 			if len(approx) == 8:
 				# If an octagon is found, return True
-				rospy.loginfo("Detected?: {}".format(True))
+				#rospy.loginfo("Detected?: {}".format(True))
 				self.is_detected.data = Bool(True)
 				self.publisher.publish(self.is_detected)
 				break
 		else:
 			# If no octagon isrospy.loginfo("Error difference: {}".format(self.error)) found, return False
-			rospy.loginfo("Detected?: {}".format(False))
+			#rospy.loginfo("Detected?: {}".format(False))
 			self.is_detected = Bool(False)
 			self.publisher.publish(self.is_detected)
 

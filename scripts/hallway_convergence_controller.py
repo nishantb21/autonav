@@ -75,10 +75,10 @@ class ConvergencePointDetector():
 				# Calculate the error difference in the x-direction only
 				self.error = x_avg - center_of_image[0]
 				# Print the error difference
-				rospy.loginfo("Error difference: {}".format(self.error))
+				#rospy.loginfo("Error difference: {}".format(self.error))
 				output_error = float((float(self.error)/float(cv_image.shape[1])))+0.5
 				self.error_pub.publish(Float64(output_error))
-				rospy.loginfo("Error output: {}".format(output_error))
+				#rospy.loginfo("Error output: {}".format(output_error))
 		# Display the image with the convergence point
 		#cv2.imshow("Convergence Point Detector", cv_image)
 		cv2.waitKey(1)

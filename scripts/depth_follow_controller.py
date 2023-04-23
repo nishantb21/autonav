@@ -46,15 +46,15 @@ class DepthFollowController:
 			# Calculate the error difference in the x-direction only
 			self.error = self.center_of_mass[0] - center_of_image[0]
 			# Print the error difference
-			rospy.loginfo("Error difference: {}".format(self.error))
+			#rospy.loginfo("Error difference: {}".format(self.error))
 			output_error = float((float(self.error)/float(w)))+0.5
 			if (output_error < 0.1) or (output_error > 0.9):
 				output_error = 0.5
 			self.error_pub.publish(Float64(output_error))
-			rospy.loginfo("Error output: {}".format(output_error))
+			#rospy.loginfo("Error output: {}".format(output_error))
 
 		else:
-			rospy.logwarn("No white shape found in the image")
+			#rospy.logwarn("No white shape found in the image")
 			self.error_pub.publish(0.5)
 	
 

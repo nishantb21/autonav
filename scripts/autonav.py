@@ -4,11 +4,12 @@ from std_msgs.msg import UInt32,Float64,Bool
 import numpy as np
 import time
 import math
-from simple_pid import PID
 import sys
 from select import select
 import termios
 import tty
+import matplotlib.pyplot as plt
+import atexit
 
 max_speed = 0.55
 
@@ -23,17 +24,19 @@ class Autonav:
         self.stop_sign = rospy.Subscriber('/stop_sign', Bool, self.stop_sign_callback)
         self.steering_input = rospy.Publisher('/servo_raw', UInt32, queue_size=10)
         self.velocity_input = rospy.Publisher('/velocity_raw', UInt32, queue_size=10)
-        self.steering_pid = PID(1.3, 0.75, 0.03, setpoint=0)
-        self.steering_pid.output_limits = (-500, 500)
-        self.steering_pid.sample_time = 0.05
-        self.last_input = 1500
+
+        self.steering_pid = PIDController(0.1, 0.0, 0.0, 1500, 1000, 2000)
+
+        self.input_data = []
+        self.output_data = []
+        self.time_array = []
 
         self.turn = False
         self.stop_sign = False
         self.start = False
 
-        self.depth_error = None
-        self.convergence_error = None
+        self.depth_error = 0.5
+        self.convergence_error = 0.5
         self.is_ball_detected = False
         self.ball_position = None
 
@@ -59,28 +62,33 @@ class Autonav:
 
     def run(self):
         if (self.start):
-            
             if self.turn:
                 self.steering_input.publish(UInt32(1750))
                 rospy.loginfo('TURN!!')
             if self.is_ball_detected:
                 rospy.loginfo('AVOIDING BALL!!')
                 error = self.ball_position_to_error(self.ball_position)
-                control = self.steering_pid((normalized_error*1000 + 1000) - 1500.0)
-                PWM = 1500.0 - control
+                self.steering_pid.set_point = error
+                control = self.steering_pid.update()
+                PWM = control
                 rospy.loginfo('command sent: {}'.format(PWM))
                 self.steering_input.publish(UInt32(PWM))
             else:
-                rospy.loginfo('depth_error: {}'.format((self.depth_error*1000 + 1000) - 1500.0))
-                rospy.loginfo('convergence_error: {}'.format((self.convergence_error*1000 + 1000) - 1500.0))
+                rospy.loginfo('depth_error: {}'.format((self.depth_error*1000 + 1000)))
+                rospy.loginfo('convergence_error: {}'.format((self.convergence_error*1000 + 1000)))
                 normalized_error = (self.depth_error + self.convergence_error)/2
-                control = self.steering_pid((normalized_error*1000 + 1000) - 1500.0)
+                self.steering_pid.set_point = (normalized_error*1000.0 + 1000.0)
+                control = self.steering_pid.update()
                 rospy.loginfo('controller output: {}'.format(control))
                 self.last_input = control
-                PWM = 1500.0 - control
+                PWM = control
                 rospy.loginfo('command sent: {}'.format(PWM))
                 self.steering_input.publish(UInt32(PWM))
                 #rospy.loginfo('steering input: {}'.format(PWM))
+
+                self.output_data.append(PWM)
+                self.input_data.append(normalized_error*1000.0 + 1000.0)
+                self.time_array.append(rospy.Time.now().to_sec())
             
             if (self.stop_sign):
                 rospy.loginfo('STOP SIGN')
@@ -107,7 +115,6 @@ class Autonav:
         else:
             self.turn = False
         
-
     def stop_sign_callback(self, data):
         if (data.data):
             self.stop_sign = True
@@ -137,13 +144,67 @@ class Autonav:
             error = 0.0
 
         return error
-            
+    
+    def save_plot(self):
+        # plot the data
+        plt.plot(self.time_array, self.input_data)
+        plt.plot(self.time_array, self.output_data)
+        plt.xlabel('Time (s)')
+        plt.ylabel('IR Data')
+        plt.title('IR Raw Data')
+
+        # save the plot as a .png file
+        plt.savefig('PID.png')
+
+class PIDController:
+    def __init__(self, kp, ki, kd, set_point, out_min, out_max):
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        self.set_point = set_point
+        self.out_min = out_min
+        self.out_max = out_max
+        
+        self.last_output = 0
+        self.last_set_point = set_point
+        self.integral_error = 0
+
+        self.last_time = rospy.Time.now().to_sec()
+        
+    def update(self):
+        time_now = rospy.Time.now().to_sec()
+        dt = time_now - self.last_time
+        self.last_time = time_now
+
+        # Calculate error
+        error = self.set_point - self.last_output
+        
+        # Calculate proportional term
+        proportional = self.kp * error
+        
+        # Calculate integral term
+        self.integral_error += error * dt
+        integral = self.ki * self.integral_error
+        
+        # Calculate derivative term
+        derivative = self.kd * (self.set_point - self.last_set_point) / dt
+        self.last_set_point = self.set_point
+        
+        # Calculate PID output
+        output = proportional + integral + derivative
+        output = max(min(output, self.out_max), self.out_min)  # Apply output limits
+        self.last_output = output
+        
+        return output
+         
 
 if __name__ == '__main__':
     try:
         auto = Autonav()
         while(1):
             auto.run()
+        # register the save_plot function to be called when the node is killed
+        atexit.register(auto.save_plot())
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
