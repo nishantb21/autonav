@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES autonav
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs tf2_ros
 #  DEPENDS system_lib
 )
 
@@ -138,6 +140,7 @@ add_executable(servo_interface src/servo_interface.cpp)
 add_executable(motor_interface src/motor_interface.cpp)
 add_executable(joystick_translator src/joystick_translator.cpp)
 add_executable(ir_node src/ir_node.cpp)
+add_executable(initial_pose_broadcaster src/initial_pose_broadcaster.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -157,6 +160,7 @@ target_link_libraries(servo_interface ${catkin_LIBRARIES})
 target_link_libraries(motor_interface ${catkin_LIBRARIES})
 target_link_libraries(joystick_translator ${catkin_LIBRARIES})
 target_link_libraries(ir_node ${catkin_LIBRARIES})
+target_link_libraries(initial_pose_broadcaster ${catkin_LIBRARIES})
 
 #############
 ## Install ##

@@ -1,14 +1,16 @@
 <!-- Currently in Dev  -->
 <!-- Trying to convert rosbag PointCloud topic to PointCloud so  -->
+<launch>
+    <!-- Need to edit based on actual names -->
+    <remap from="cloud_in" to="/orb_slam2_rgbd/map_points" />
 
-<!-- Need to edit based on actual names -->
-<remap from="cloud_in" to="/orb_slam2_rgbd/map_points" />
-
-<!-- Launch Octomap server and tell it to look at rgbd points -->
-<include file="$(find octomap_server)/launch/octomap_mapping.launch" />
+    <!-- Launch Octomap server and tell it to look at rgbd points -->
+    <include file="$(find octomap_server)/launch/octomap_mapping.launch" />
 
 <!-- Need to set global map frame, relate sensors to it, set parameters -->
 <!-- RVIZ view projected_map for 3D to 2D projection of map topic -->
 
 <!-- Just run "octomap_saver mapfile.bt" to request a 
 compressed binary octomap via service call and save it to mapfile.bt -->
+
+</launch>
