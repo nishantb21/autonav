@@ -1,9 +1,9 @@
 <launch>
-    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tf" args="0 0 0 0 0 0 /map /odom 30" /> -->
-    <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_camera_tf" args="0.1 0 0 0 0 0 /base_link /camera_link 10"/>
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tf" args="0 0 0 0 0 0 1 map odom" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_camera_tf" args="0.1 0 0 0 0 0 1 /base_link /camera_link"/>
     
-    <!-- <include file="$(find orb_slam2_ros)/ros/launch/orb_slam2_d435_rgbd.launch"/>
-    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/> -->
+    <include file="$(find orb_slam2_ros)/ros/launch/orb_slam2_d435_rgbd.launch"/>
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
         <!-- <arg name="initial_reset" value="true" /> -->
     <!-- </include> -->
 
@@ -11,11 +11,11 @@
 
 
     <!-- Inital TF from base_link to map frame Launch -->
-    <!-- <node pkg="autonav" name="initial_pose_broadcaster" type="init_tf_broadcaster" output="screen" /> -->
+    <node pkg="autonav" name="initial_pose_broadcaster" type="initial_pose_broadcaster" output="screen" />
     
     <!-- Frame IDs for ORBSLAM -->
-    <!-- <param name="camera_frame_id" type="string" value="camera_link" />
-    <param name="pointcloud_frame_id" type="string" value="map" /> -->
+    <param name="camera_frame_id" type="string" value="camera_link" />
+    <param name="pointcloud_frame_id" type="string" value="map" />
     <!-- May need to modify -->
     <!-- <param name="target_frame_id" type="string" value="odom" /> -->
 
