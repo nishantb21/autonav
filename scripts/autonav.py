@@ -44,9 +44,9 @@ class Autonav:
         self.steering_input.publish(UInt32(1500))  
 
         settings = self.saveTerminalSettings()
-        key_timeout = rospy.get_param("~key_timeout", 0.5)
+        key_timeout = rospy.get_param("~key_timeout", 0.1)
 
-        t_end = time.time() + 60 * 0.25
+        t_end = time.time() + 60 * 5.00
 
         while (time.time() < t_end):
             self.steering_input.publish(UInt32(1500))
@@ -69,16 +69,19 @@ class Autonav:
                 rospy.loginfo('AVOIDING BALL!!')
                 error = self.ball_position_to_error(self.ball_position)
                 self.steering_pid.set_point = error
-                control = self.steering_pid.update()
+                #control = self.steering_pid.update()
+		control = error*1000.0+1000.0	
                 PWM = control
                 rospy.loginfo('command sent: {}'.format(PWM))
                 self.steering_input.publish(UInt32(PWM))
             else:
                 rospy.loginfo('depth_error: {}'.format((self.depth_error*1000 + 1000)))
                 rospy.loginfo('convergence_error: {}'.format((self.convergence_error*1000 + 1000)))
-                normalized_error = (self.depth_error + self.convergence_error)/2
-                self.steering_pid.set_point = (normalized_error*1000.0 + 1000.0)
-                control = self.steering_pid.update()
+                #normalized_error = (self.depth_error + self.convergence_error)/2
+		normalized_error = self.depth_error
+                #self.steering_pid.set_point = (normalized_error*1000.0 + 1000.0)
+                #control = self.steering_pid.update()
+		control = normalized_error*1000.0+1000.0
                 rospy.loginfo('controller output: {}'.format(control))
                 self.last_input = control
                 PWM = control
@@ -201,7 +204,7 @@ class PIDController:
 if __name__ == '__main__':
     try:
         auto = Autonav()
-        while(1):
+        while not rospy.is_shutdown():
             auto.run()
         # register the save_plot function to be called when the node is killed
         atexit.register(auto.save_plot())
