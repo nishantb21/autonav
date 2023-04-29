@@ -192,7 +192,7 @@ class PIDController:
         
         # Calculate PID output
         output = proportional + integral + derivative
-        output = max(min(output, self.out_max), self.out_min)  # Apply output limits
+        output = np.clip(output,self.out_min,self.out_max)
         self.last_output = output
         
         return output
