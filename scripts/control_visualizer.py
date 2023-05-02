@@ -19,6 +19,9 @@ class Visualize:
 		self.ir_sensor = rospy.Subscriber('/ir_raw', UInt32, self.ir_sensor_callback)
 		self.stop_sign = rospy.Subscriber('/stop_sign', Bool, self.stop_sign_callback)
 		self.PID_sub = rospy.Subscriber('/servo_raw', UInt32, self.PID_output_callback)
+		self.depth_turn = rospy.Subscriber('/depth_turn_indicator', Bool, self.depth_turn_callback)
+		self.imu_turn = rospy.Subscriber('/imu_turn', Bool, self.imu_turn_indicator)
+
 
 		self.image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.image_callback)
 
@@ -27,6 +30,8 @@ class Visualize:
 		self.is_ball_detected = False
 		self.ball_position = self.turn = False
 		self.PID_output = None
+		self.depth_turn_value = False
+		self.imu_turn_value = False
 
 	def image_callback(self, data):
 		color_image = self.bridge.imgmsg_to_cv2(data, "rgb8")
@@ -40,22 +45,22 @@ class Visualize:
 
 		# Calculate error difference between the center of mass and center of image
 		scaled_depth_error = scaling_factor * self.depth_error
-		scaled_convergence_error = scaling_factor * self.convergence_error
+		#scaled_convergence_error = scaling_factor * self.convergence_error
 		scaled_ball_position = scaling_factor * self.ball_position
 
 		# Draw lines on the image
 		depth_line = int(scaled_depth_error)
-		convergence_line = int(scaled_convergence_error)
+		#convergence_line = int(scaled_convergence_error)
 		ball_line = int(scaled_ball_position)
 		center_of_image = (int(w / 2), int(h / 2))
 		cv2.line(color_image, (depth_line, 0), (depth_line, h), (0, 0, 255), 2)
 		cv2.putText(color_image, text= str('Depth'), org=(depth_line, 20),
 			fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
             thickness=2, lineType=cv2.LINE_AA)
-		cv2.line(color_image, (convergence_line, 0), (convergence_line, h), (0, 255, 0), 2)
-		cv2.putText(color_image, text= str('Convergence'), org=(convergence_line, 40),
-	    	fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
-            thickness=2, lineType=cv2.LINE_AA)
+		#cv2.line(color_image, (convergence_line, 0), (convergence_line, h), (0, 255, 0), 2)
+		#cv2.putText(color_image, text= str('Convergence'), org=(convergence_line, 40),
+	    #	fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
+        #    thickness=2, lineType=cv2.LINE_AA)
 		if (self.is_ball_detected):
 			cv2.line(color_image, (ball_line, 0), (ball_line, h), (255, 0, 255), 2)
 			cv2.putText(color_image, text= str('Ball'), org=(ball_line, 60),
@@ -76,6 +81,14 @@ class Visualize:
         #    thickness=2, lineType=cv2.LINE_AA)
 
 		# Show the image
+
+		if (self.depth_turn_value is True):
+			cv2.arrowedLine(color_image, (w/2,h/2), (w,h/2),
+                                     (0, 255, 0), 7)
+		if (self.imu_turn_value is True):
+			cv2.arrowedLine(color_image, (w/2,h/3), (w,h/3),
+                                     (255, 0, 0), 7)
+		
 		cv2.imshow('Depth Follow Controller', color_image)
 		cv2.waitKey(1)
 
@@ -106,6 +119,12 @@ class Visualize:
 	def PID_output_callback(self, data):
 		PID_raw = data.data
 		self.PID_output = (float(PID_raw) -1000.0) / 1000.0
+
+	def depth_turn_callback(self, data):
+		self.depth_turn_value = data.data
+
+	def imu_turn_indicator(self, data):
+		self.imu_turn_value = data.data
 
 if __name__ == '__main__':
 	try:
