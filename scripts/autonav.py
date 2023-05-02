@@ -12,7 +12,9 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
-max_speed = 0.54
+straight_speed = 1590
+turn_speed = 1570
+time_delay = 1.5
 
 class Autonav:
 	def __init__(self):
@@ -59,13 +61,15 @@ class Autonav:
 
 		self.depth_turn_value = False
 
+		self.desired_time = None
+
 		self.velocity_input.publish(UInt32(1500))
 		self.steering_input.publish(UInt32(1500))  
 
 		settings = self.saveTerminalSettings()
 		key_timeout = rospy.get_param("~key_timeout", 0.5)
 
-		t_end = time.time() + 60
+		t_end = time.time() + 60 * 5.0
 
 		while ((time.time() < t_end) and (not rospy.is_shutdown())):
 			self.steering_input.publish(UInt32(1500))
@@ -84,18 +88,22 @@ class Autonav:
 			if (self.depth_turn_value is True) or (self.imu_turn_value is True):
 				rospy.loginfo('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
 				rospy.loginfo('yaw: {}'.format(self.yaw))
-				if self.previous_yaw is None:
-					self.previous_yaw = self.yaw
-					self.imu_turn_value = True
-				else:
-					self.current_yaw = self.yaw
-					self.imu_turn_value = not self.is_turn_finsihed()
+                if self.desired_time is None:
+			self.desired_time = time.time() + time_delay
+                elif time.time() >= self.desired_time:
+			if self.previous_yaw is None:
+				self.previous_yaw = self.yaw
+				self.imu_turn_value = True
+			else:
+				self.current_yaw = self.yaw
+				self.imu_turn_value = not self.is_turn_finsihed()
 
-				self.steering_input.publish(UInt32(1650)) 
+				self.steering_input.publish(UInt32(1550))
+				self.velocity_input.publish(UInt32(turn_speed)) 
 
-				if self.imu_turn_value is False:
-					self.previous_yaw = None
-				
+			if self.imu_turn_value is False:
+				self.previous_yaw = None
+				self.desired_time = None
 			if self.is_ball_detected:
 				rospy.loginfo('AVOIDING BALL!!')
 				error = self.ball_position_to_error(self.ball_position)
@@ -112,6 +120,9 @@ class Autonav:
 				#self.steering_pid.set_point = (normalized_error*1000.0 + 1000.0)
 				#control = self.steering_pid.update()
 				control = (normalized_error*1000.0 + 1000.0)
+				error_temp = control - 1500.0
+				error_temp *= 1.3
+				output = np.clip(1500 + error_temp,1000.0,2000.0)
 				rospy.loginfo('controller output: {}'.format(control))
 				self.last_input = control
 				PWM = control
@@ -128,7 +139,7 @@ class Autonav:
 				self.velocity_input.publish(UInt32(1500))
 			else:
 				rospy.loginfo('FORWARD!!')
-				self.velocity_input.publish(UInt32(1550))
+				self.velocity_input.publish(UInt32(straight_speed))
 
 		self.imu_turn.publish(Bool(self.imu_turn_value))
 
@@ -264,8 +275,9 @@ class PIDController:
 		self.last_set_point = self.set_point
 		
 		# Calculate PID output
-		output = proportional + integral + derivative
-		output = max(min(output, self.out_max), self.out_min)  # Apply output limits
+		output = proportional + integral + derivative + (self.out_min+((self.out_max-self.out_min)/2))
+		#output = max(min(output, self.out_max), self.out_min)  # Apply output limits
+		output = np.clip(output,self.out_min,self.out_max)
 		self.last_output = output
 		
 		return output

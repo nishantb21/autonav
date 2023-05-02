@@ -13,7 +13,7 @@ class DepthFollowController:
 		self.image_sub = rospy.Subscriber('/camera/depth/image_rect_raw', Image, self.depth_image_callback)
 		self.error_pub = rospy.Publisher('/depth_controller_error', Float64, queue_size=10)
 		self.turn_pub = rospy.Publisher('/depth_turn_indicator', Bool, queue_size=10)
-		self.largest_contour = rospy.Publisher('/largest_contour', Float64, queue_size=1)
+		#self.largest_contour = rospy.Publisher('/largest_contour', Float64, queue_size=1)
 		self.error = 0
 		self.depth_image = None
 		self.color_image = None
@@ -49,7 +49,7 @@ class DepthFollowController:
 					h, w = depth_image.shape
 					center_of_image = (int(w / 2), int(h / 2))
 					# Calculate the error difference in the x-direction only
-					self.error = (self.center_of_mass[0] - w/10) - center_of_image[0]
+					self.error = self.center_of_mass[0] - center_of_image[0]
 					# Print the error difference
 					#rospy.loginfo("Error difference: {}".format(self.error))
 					output_error = float((float(self.error)/float(w)))+0.5
@@ -71,7 +71,7 @@ class DepthFollowController:
 		else:
 			#rospy.logwarn("No white shape found in the image")
 			self.error_pub.publish(0.65)
-			self.turn_pub.publish(Bool(True))
+			self.turn_pub.publish(Bool(True)
 	
 
 if __name__ == '__main__':
