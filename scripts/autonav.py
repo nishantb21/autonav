@@ -65,7 +65,7 @@ class Autonav:
 		settings = self.saveTerminalSettings()
 		key_timeout = rospy.get_param("~key_timeout", 0.5)
 
-		t_end = time.time() + 60 * 0.25
+		t_end = time.time() + 60
 
 		while ((time.time() < t_end) and (not rospy.is_shutdown())):
 			self.steering_input.publish(UInt32(1500))
