@@ -98,8 +98,8 @@ class Autonav:
 						self.current_yaw = self.yaw
 						self.imu_turn_value = not self.is_turn_finsihed()
 
-						self.steering_input.publish(UInt32(1550))
-						self.velocity_input.publish(UInt32(turn_speed)) 
+					self.steering_input.publish(UInt32(1550))
+					self.velocity_input.publish(UInt32(turn_speed)) 
 
 				if self.imu_turn_value is False:
 					self.previous_yaw = None
