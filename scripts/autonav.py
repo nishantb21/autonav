@@ -14,7 +14,7 @@ import atexit
 
 straight_speed = 1590
 turn_speed = 1570
-time_delay = 1.5
+time_delay = 1.0
 
 class Autonav:
 	def __init__(self):
@@ -86,11 +86,12 @@ class Autonav:
 	def run(self):
 		if (self.start):
 			if (self.depth_turn_value is True) or (self.imu_turn_value is True):
-				rospy.loginfo('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-				rospy.loginfo('yaw: {}'.format(self.yaw))
 				if self.desired_time is None:
+					rospy.loginfo('TIME: {}'.format(self.desired_time))
 					self.desired_time = time.time() + time_delay
 				elif time.time() >= self.desired_time:
+					rospy.loginfo('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+					rospy.loginfo('yaw: {}'.format(self.yaw))
 					if self.previous_yaw is None:
 						self.previous_yaw = self.yaw
 						self.imu_turn_value = True
@@ -98,12 +99,14 @@ class Autonav:
 						self.current_yaw = self.yaw
 						self.imu_turn_value = not self.is_turn_finsihed()
 
+					if self.imu_turn_value is False:
+						self.previous_yaw = None
+						self.desired_time = None
+
 					self.steering_input.publish(UInt32(1550))
 					self.velocity_input.publish(UInt32(turn_speed)) 
-
-				if self.imu_turn_value is False:
-					self.previous_yaw = None
-					self.desired_time = None
+				else:
+					rospy.loginfo('WAITING FOR TURN')
 					
 			if self.is_ball_detected:
 				rospy.loginfo('AVOIDING BALL!!')
