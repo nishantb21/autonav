@@ -1,34 +1,39 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <std_msgs/UInt32.h>
 #include <sensor_msgs/Imu.h>
 
 //used for keeping track of the state of the robot
 struct state{  
         float x;
         float y;
-        float yaw;
+        float theta;
 
         // derivative states
         float x_dot;
         float y_dot;
-        float yaw_dot;
+        float theta_dot;
 
         //wheel angle
-        float wheel_ang;
+        float steering_angle;
 };
 
 class DynModel {
     public:
         DynModel(float dtime) : nh_("~") {
             this->dtime = dtime;
+            this->reset = false;
 
             // Initialize publisher
-            pub_ = nh_.advertise<std_msgs::String>("my_topic_out", 10);
+            pub_ = nh_.advertise<std_msgs::String>("modeled_pose", 10);
             // topic to publish: predicted position of the robot
             
-            // Initialize subscriber
-            // sub_ = nh_.subscribe("/known_state", 10, &MyNode::callback, this);
+            // Initialize subscribers
             sub_imu = nh_.subscribe("/imu/data", 10, &DynModel::callback_imu, this);
+            sub_known_state = nh_.subscribe("/known_state", 10, &DynModel::callback_known_state, this);
+            sub_velocity_raw = nh_.subscribe("/velocity_raw", 10, &DynModel::callback_imu, this);
+            sub_servo_raw = nh_.subscribe("/servo_raw", 10, &DynModel::callback_imu, this);
+
             // topics to sub to:
             // commmands: 
         }
@@ -45,24 +50,57 @@ class DynModel {
             pub_.publish(response_msg);
         }
 
+        // update this->modeled_state.x/y/theta with pose
+        void callback_known_state(const  geometry_msgs::pose2D::ConstPtr& msg){
+            modeled_state->x = msg->x;
+            modeled_state->y = msg->y;
+            modeled_state->theta = msg->theta;
+            return;
+        }
+
+        // update this->modeled_state->x_dot with pose
+        void callback_velocity_raw(const  std_msgs::UInt32::ConstPtr& msg){
+            modeled_state->x_dot = pwm2vel(msg->data);
+            return;
+        }
+
+        void callbacK_servo_raw(const std_msgs::UInt32::ConstPtr& msg){
+            modeled_state->steering_angle = pwm2steeringang(msg->data);
+            return;
+        }
+
         void updateKnownState(state cur_state){
-            last_known_state = cur_state;
+            modeled_state = cur_state;
+        }
+
+        void modelDynamics(){
+            while (ros::ok){
+
+                if (reset){
+                    this->cur_modeled_state = last_known_state;
+                }
+
+            }
         }
 
     private:
-
+        volatile bool reset;
         float dtime;
 
-        state last_known_state;
-        state cur_modeled_state;
+        volatile state modeled_state;
         
         ros::NodeHandle nh_;
         ros::Publisher pub_;
+
+        // subscribers
         ros::Subscriber sub_imu;
+        ros::Subscriber sub_known_state;
+        ros::Subscriber sub_velocity_raw;
+        ros::Subscriber sub_servo_raw;
 };
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "DynModel");
+  ros::init(argc, argv, "dyn_model");
   DynModel node(1);
   ros::spin();
   return 0;
