@@ -12,7 +12,7 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
-max_speed = 0.55
+max_speed = 0.54
 
 class Autonav:
 	def __init__(self):
