@@ -22,25 +22,29 @@ class PWM2Velocity {
 
             // Create and publish a response message
             std_msgs::Float32 response_msg;
-            response_msg.data = interp(curve_x,curve_y,vec_len,msg->data);
+            response_msg.data = interp(curve_x, curve_y, vec_len, msg->data);
+            // ROS_INFO_STREAM("Received return from interp: " << response_msg.data);
             pub_.publish(response_msg);
-        }
+            return;
+        } 
 
         float interp(float* data_x, float* data_y, int len, float sample_x){
             // check if sample is out of bounds
+            // ROS_INFO_STREAM("in interp() with sample=" << sample_x);
             if (sample_x <= data_x[0]){
-                ROS_INFO_STREAM("sample is less than data_x[0]. sample_x = " << sample_x);
-                return data_x[0];
-            }else if (sample_x >= data_x[len]){
-                return data_x[len];
+                ROS_INFO_STREAM("pwm_to_velocity: commanded pwm is below data range");
+                return data_y[0];
+            }else if (sample_x >= data_x[len-1]){
+                ROS_INFO_STREAM("pwm_to_velocity: commanded pwm is above data range");
+                return data_y[len-1];
             }
 
             //iterate through until location of sample_x is found within data_x
             int left_ind = 0;
-            for(left_ind=0; data_x[left_ind] < sample_x; left_ind++);
+            while (data_x[left_ind++] < sample_x);
 
             // use point slope form to get point
-            return ((data_y[left_ind+1]-data_y[left_ind])/(data_x[left_ind+1]-data_x[left_ind]))*(sample_x-data_x[left_ind]) + data_y[left_ind];
+            return (((data_y[left_ind]-data_y[left_ind+1])/(data_x[left_ind]-data_x[left_ind+1]))*(sample_x-data_x[left_ind])) + data_y[left_ind];
         }
 
 
