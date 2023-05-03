@@ -105,7 +105,7 @@ class PWMOdom {
 };
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "pwm_odom");
+    ros::init(argc, argv, "pwm_estimates");
     PWMOdom node;
     ros::spin();
     return 0;
