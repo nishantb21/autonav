@@ -14,7 +14,7 @@ import atexit
 
 straight_speed = 1590
 turn_speed = 1570
-time_delay = 1.5
+time_delay = 1.0
 
 class Autonav:
 	def __init__(self):
@@ -98,7 +98,11 @@ class Autonav:
 						self.current_yaw = self.yaw
 						self.imu_turn_value = not self.is_turn_finsihed()
 
-					self.steering_input.publish(UInt32(1550))
+					if self.imu_turn_value is False:
+	                                        self.previous_yaw = None
+	                                        self.desired_time = None
+
+					self.steering_input.publish(UInt32(1520))
 					self.velocity_input.publish(UInt32(turn_speed)) 
 
 				if self.imu_turn_value is False:
@@ -123,7 +127,7 @@ class Autonav:
 				control = (normalized_error*1000.0 + 1000.0)
 				error_temp = control - 1500.0
 				error_temp *= 1.3
-				output = np.clip(1500 + error_temp,1000.0,2000.0)
+				control = np.clip(1500 + error_temp,1000.0,2000.0)
 				rospy.loginfo('controller output: {}'.format(control))
 				self.last_input = control
 				PWM = control

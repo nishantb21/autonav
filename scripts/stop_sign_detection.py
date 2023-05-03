@@ -15,7 +15,7 @@ class StopSignDetector():
 		self.color_image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.color_image_callback)
 		self.publisher = rospy.Publisher('/stop_sign', Bool, queue_size=1)
 
-		self.is_detected = Bool()
+		self.is_detected = Bool(False)
 
 	def color_image_callback(self,data):
 		# Load the image file
@@ -44,14 +44,14 @@ class StopSignDetector():
 			if len(approx) == 8:
 				# If an octagon is found, return True
 				#rospy.loginfo("Detected?: {}".format(True))
-				self.is_detected.data = Bool(True)
-				self.publisher.publish(self.is_detected)
+				self.is_detected.data = True
+				self.publisher.publish(Bool(True))
 				break
 		else:
 			# If no octagon isrospy.loginfo("Error difference: {}".format(self.error)) found, return False
 			#rospy.loginfo("Detected?: {}".format(False))
 			self.is_detected = Bool(False)
-			self.publisher.publish(self.is_detected)
+			self.publisher.publish(Bool(False))
 
 if __name__=='__main__':
 	try:

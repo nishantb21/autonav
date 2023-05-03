@@ -143,6 +143,14 @@
         <arg name="ordered_pc"               value="$(arg ordered_pc)"/>
     </include>
 
+    <include file="$(find phidgets_imu)/launch/imu.launch" />
+
+    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="ImuFilter">
+      <param name="_use_mag" value="false"/>
+      <param name="_publish_tf" value="false"/>
+      <param name="_world_frame" value="enu"/>
+    </node>
+
     <param name="velocity_upper" type="int" value="1550" />
     <node name="servo_interface" pkg="autonav" type="servo_interface" output="screen"/>
     <node name="motor_interface" pkg="autonav" type="motor_interface" output="screen"/>
