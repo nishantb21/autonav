@@ -2,29 +2,51 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/UInt32.h>
 
-class PWM2Velocity {
+class PWMOdom {
     public:
-        const static int vec_len = 5;
-        float curve_x[vec_len] = {1400, 1500, 1600, 1700, 1800};
-        float curve_y[vec_len] = {-2.5, 0,    2.5,  3.5,  4.5};
+        const static int vel_vec_len = 5;
+        float vel_curve_x[vel_vec_len] = {1400, 1500, 1600, 1700, 1800};
+        float vel_curve_y[vel_vec_len] = {-2.5, 0,    2.5,  3.5,  4.5};
 
-        PWM2Velocity() : nh_("~") {
-                // Initialize publisher
-                pub_ = nh_.advertise<std_msgs::Float32>("pwm_to_velocity", 10);
+        const static int steer_vec_len = 3;
+        float steer_curve_x[steer_vec_len] = {1000, 1500, 2000};
+        float steer_curve_y[steer_vec_len] = {-45/180*3.14, 0, 45/180*3.14};
 
-                // Initialize subscriber
-                sub_ = nh_.subscribe("/velocity_raw", 10, &PWM2Velocity::callback, this);
+        PWMOdom() : nh_("~") {
+            // Initialize publisher
+            pub_vel = nh_.advertise<std_msgs::Float32>("pwm_to_velocity", 10);
+            pub_steering_ang = nh_.advertise<std_msgs::Float32>("pwm_to_steering_ang", 10);
+            pub_ang_vel = nh_.advertise<std_msgs::Float32>("pwm_ang_vel", 10);
+
+            // Initialize subscriber
+            sub_vel = nh_.subscribe("/velocity_raw", 10, &PWMOdom::callback_pwm_to_vel, this);
+            sub_steering = nh_.subscribe("/steering_raw", 10, &PWMOdom::callback_pwm_to_steer, this);
         }
 
-        void callback(const std_msgs::UInt32::ConstPtr& msg) {
+        void callback_pwm_to_vel(const std_msgs::UInt32::ConstPtr& msg) {
             // Process message received on the subscriber
             // ROS_INFO_STREAM("Received message: " << msg->data);
 
             // Create and publish a response message
             std_msgs::Float32 response_msg;
-            response_msg.data = interp(curve_x, curve_y, vec_len, msg->data);
+            response_msg.data = interp(vel_curve_x, vel_curve_y, vel_vec_len, msg->data);
+
+            cur_vel = response_msg.data;
+
             // ROS_INFO_STREAM("Received return from interp: " << response_msg.data);
-            pub_.publish(response_msg);
+            pub_vel.publish(response_msg);
+            return;
+        } 
+
+        void callback_pwm_to_steer(const std_msgs::UInt32::ConstPtr& msg) {
+            // Process message received on the subscriber
+            // ROS_INFO_STREAM("Received message: " << msg->data);
+
+            // Create and publish a response message
+            std_msgs::Float32 response_msg;
+            response_msg.data = interp(steer_curve_x, steer_curve_y, steer_vec_len, msg->data);
+            // ROS_INFO_STREAM("Received return from interp: " << response_msg.data);
+            pub_ang_vel.publish(response_msg);
             return;
         } 
 
@@ -50,14 +72,19 @@ class PWM2Velocity {
 
 
     private:
+        volatile float cur_vel;
+
         ros::NodeHandle nh_;
-        ros::Publisher pub_;
-        ros::Subscriber sub_;
+        ros::Publisher pub_vel;
+        ros::Publisher pub_ang_vel;
+        ros::Publisher pub_steering_ang;
+        ros::Subscriber sub_vel;
+        ros::Subscriber sub_steering;
 };
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "pwm_to_velocity");
-    PWM2Velocity node;
+    ros::init(argc, argv, "pwm_odom");
+    PWMOdom node;
     ros::spin();
     return 0;
 }
