@@ -12,9 +12,9 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
-straight_speed = 1590
-turn_speed = 1570
-time_delay = 1.0
+straight_speed = 1680
+turn_speed = 1520
+time_delay = 0.15
 
 class Autonav:
 	def __init__(self):
@@ -36,7 +36,7 @@ class Autonav:
 		self.depth_turn = rospy.Subscriber('/depth_turn_indicator', Bool, self.depth_turn_callback)
 		self.imu_turn = rospy.Publisher('/imu_turn', Bool, queue_size=10)
 
-		self.imu = rospy.Subscriber('/imu/data', Imu, self.imu_callback)
+		self.imu = rospy.Subscriber('/imu/data', Imu, self.imu_callback, queue_size=1)
 
 		self.steering_pid = PIDController(0.1, 0.0, 0.0, 1500, 1000, 2000)
 
@@ -103,7 +103,7 @@ class Autonav:
 	                                        self.previous_yaw = None
 	                                        self.desired_time = None
 
-					self.steering_input.publish(UInt32(1520))
+					self.steering_input.publish(UInt32(1950))
 					self.velocity_input.publish(UInt32(turn_speed)) 
 				else:
 					rospy.loginfo('WAITING FOR TURN')
@@ -242,7 +242,7 @@ class Autonav:
 		# calculate the change in yaw and see if it's 45 degrees clockwise
 		delta_yaw = self.current_yaw - self.previous_yaw
 		rospy.loginfo('delta yaw: {}'.format(delta_yaw))
-		return delta_yaw <= -math.pi/6
+		return delta_yaw <= -math.pi/4
 
 class PIDController:
 	def __init__(self, kp, ki, kd, set_point, out_min, out_max):

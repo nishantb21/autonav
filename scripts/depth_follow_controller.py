@@ -40,7 +40,7 @@ class DepthFollowController:
 		if contours:
 			largest_contour = max(contours, key=cv2.contourArea)
 			self.largest_contour.publish(Float64(cv2.contourArea(largest_contour)))
-			if cv2.contourArea(largest_contour) > 6000:
+			if cv2.contourArea(largest_contour) > 6500:
 				# Find the center of mass of the largest contour
 				M = cv2.moments(largest_contour)
 				try:
