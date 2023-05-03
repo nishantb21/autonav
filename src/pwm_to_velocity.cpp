@@ -5,12 +5,13 @@
 class PWMOdom {
     public:
         const static int vel_vec_len = 5;
+        const static int steer_vec_len = 3;
+
         float vel_curve_x[vel_vec_len] = {1400, 1500, 1600, 1700, 1800};
         float vel_curve_y[vel_vec_len] = {-2.5, 0,    2.5,  3.5,  4.5};
 
-        const static int steer_vec_len = 3;
         float steer_curve_x[steer_vec_len] = {1000, 1500, 2000};
-        float steer_curve_y[steer_vec_len] = {-45/180*3.14, 0, 45/180*3.14};
+        float steer_curve_y[steer_vec_len] = {-0.785, 0, 0.785}; //45 deg in radians
 
         PWMOdom() : nh_("~") {
             // Initialize publisher
@@ -20,8 +21,13 @@ class PWMOdom {
 
             // Initialize subscriber
             sub_vel = nh_.subscribe("/velocity_raw", 10, &PWMOdom::callback_pwm_to_vel, this);
-            sub_steering = nh_.subscribe("/steering_raw", 10, &PWMOdom::callback_pwm_to_steer, this);
-        }
+            sub_steering = nh_.subscribe("/servo_raw", 10, &PWMOdom::callback_pwm_to_steer, this);
+
+            for (int i = 0; i<steer_vec_len; i++)
+                ROS_INFO_STREAM("steer_curve_y[" << i <<"]: " << steer_curve_y[i]);
+            for (int i = 0; i<vel_vec_len; i++)
+                ROS_INFO_STREAM("vel_curve_y[" << i <<"]: " << vel_curve_y[i]);
+        }   
 
         void callback_pwm_to_vel(const std_msgs::UInt32::ConstPtr& msg) {
             // Process message received on the subscriber
@@ -40,13 +46,13 @@ class PWMOdom {
 
         void callback_pwm_to_steer(const std_msgs::UInt32::ConstPtr& msg) {
             // Process message received on the subscriber
-            // ROS_INFO_STREAM("Received message: " << msg->data);
+            ROS_INFO_STREAM("callback_pwm_to_steer Received message: " << msg->data);
 
             // Create and publish a response message
             std_msgs::Float32 response_msg;
             response_msg.data = interp(steer_curve_x, steer_curve_y, steer_vec_len, msg->data);
             // ROS_INFO_STREAM("Received return from interp: " << response_msg.data);
-            pub_ang_vel.publish(response_msg);
+            pub_steering_ang.publish(response_msg);
             return;
         } 
 
@@ -62,11 +68,17 @@ class PWMOdom {
             }
 
             //iterate through until location of sample_x is found within data_x
-            int left_ind = 0;
-            while (data_x[left_ind++] < sample_x);
+            int left_ind = 1;
+            while (data_x[left_ind] < sample_x){
+                // ROS_INFO_STREAM("while loop: data_x[left_ind++]: " << data_x[left_ind]);
+                left_ind++;
+            }
+            left_ind--;
 
             // use point slope form to get point
-            return (((data_y[left_ind]-data_y[left_ind+1])/(data_x[left_ind]-data_x[left_ind+1]))*(sample_x-data_x[left_ind])) + data_y[left_ind];
+            float val =  (((data_y[left_ind]-data_y[left_ind+1])/(data_x[left_ind]-data_x[left_ind+1]))*(sample_x-data_x[left_ind])) + data_y[left_ind];
+            ROS_INFO_STREAM("sample_x: "<<sample_x<<", left_ind: " << left_ind<< ", val: " << val <<", data_y[left_ind]: " << data_y[left_ind] << ", data_y[left_ind+1]: " << data_y[left_ind+1] << ", data_x[left_ind]: " << data_x[left_ind] << ", data_x[left_ind+1]: " << data_x[left_ind+1]);
+            return val;
         }
 
 
