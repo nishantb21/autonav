@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/UInt32.h>
+#include <math.h>
 
 class PWMOdom {
     public:
@@ -14,6 +15,9 @@ class PWMOdom {
         float steer_curve_y[steer_vec_len] = {-0.785, 0, 0.785}; //45 deg in radians
 
         PWMOdom() : nh_("~") {
+            wheel_base = .15; //check this?
+            cur_vel = 0;
+
             // Initialize publisher
             pub_vel = nh_.advertise<std_msgs::Float32>("pwm_to_velocity", 10);
             pub_steering_ang = nh_.advertise<std_msgs::Float32>("pwm_to_steering_ang", 10);
@@ -23,10 +27,6 @@ class PWMOdom {
             sub_vel = nh_.subscribe("/velocity_raw", 10, &PWMOdom::callback_pwm_to_vel, this);
             sub_steering = nh_.subscribe("/servo_raw", 10, &PWMOdom::callback_pwm_to_steer, this);
 
-            // for (int i = 0; i<steer_vec_len; i++)
-            //     ROS_INFO_STREAM("steer_curve_y[" << i <<"]: " << steer_curve_y[i]);
-            // for (int i = 0; i<vel_vec_len; i++)
-            //     ROS_INFO_STREAM("vel_curve_y[" << i <<"]: " << vel_curve_y[i]);
         }   
 
         void callback_pwm_to_vel(const std_msgs::UInt32::ConstPtr& msg) {
@@ -53,6 +53,10 @@ class PWMOdom {
             response_msg.data = interp(steer_curve_x, steer_curve_y, steer_vec_len, msg->data);
             // ROS_INFO_STREAM("Received return from interp: " << response_msg.data);
             pub_steering_ang.publish(response_msg);
+
+            std_msgs::Float32 angvel_msg;
+            angvel_msg.data = calcAngVel(response_msg.data);
+            pub_ang_vel.publish(angvel_msg); //publish the angular velocity based on velocity, wheel angle, and wheel base
             return;
         } 
 
@@ -79,6 +83,11 @@ class PWMOdom {
             float val =  (((data_y[left_ind]-data_y[left_ind+1])/(data_x[left_ind]-data_x[left_ind+1]))*(sample_x-data_x[left_ind])) + data_y[left_ind];
             //ROS_INFO_STREAM("sample_x: "<<sample_x<<", left_ind: " << left_ind<< ", val: " << val <<", data_y[left_ind]: " << data_y[left_ind] << ", data_y[left_ind+1]: " << data_y[left_ind+1] << ", data_x[left_ind]: " << data_x[left_ind] << ", data_x[left_ind+1]: " << data_x[left_ind+1]);
             return val;
+        }
+
+        float calcAngVel(float wheelAngle){
+            float turn_radius = wheel_base/tan(wheelAngle);
+            return cur_vel/turn_radius;
         }
 
 
