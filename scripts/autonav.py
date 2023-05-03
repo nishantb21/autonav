@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 import atexit
 
 straight_speed = 1680
-turn_speed = 1520
-time_delay = 0.15
+turn_speed = 1540
+time_delay = 0.0
 
 class Autonav:
 	def __init__(self):
@@ -39,6 +39,8 @@ class Autonav:
 		self.imu = rospy.Subscriber('/imu/data', Imu, self.imu_callback, queue_size=1)
 
 		self.steering_pid = PIDController(0.1, 0.0, 0.0, 1500, 1000, 2000)
+
+		self.controller_time = time.time()
 
 		self.input_data = []
 		self.output_data = []
@@ -103,7 +105,7 @@ class Autonav:
 	                                        self.previous_yaw = None
 	                                        self.desired_time = None
 
-					self.steering_input.publish(UInt32(1950))
+					self.steering_input.publish(UInt32(1900))
 					self.velocity_input.publish(UInt32(turn_speed)) 
 				else:
 					rospy.loginfo('WAITING FOR TURN')
@@ -125,7 +127,7 @@ class Autonav:
 				#control = self.steering_pid.update()
 				control = (normalized_error*1000.0 + 1000.0)
 				error_temp = control - 1500.0
-				error_temp *= 1.3
+				error_temp *= 1.5
 				control = np.clip(1500 + error_temp,1000.0,2000.0)
 				rospy.loginfo('controller output: {}'.format(control))
 				self.last_input = control
@@ -141,6 +143,8 @@ class Autonav:
 			if (self.stop_sign):
 				rospy.loginfo('STOP SIGN')
 				self.velocity_input.publish(UInt32(1500))
+			elif ((time.time() - self.controller_time) > 1.0):
+				self.velocity_input.publish(UInt32(1500))
 			else:
 				rospy.loginfo('FORWARD!!')
 				self.velocity_input.publish(UInt32(straight_speed))
@@ -149,6 +153,7 @@ class Autonav:
 
 	def depth_callback(self, data):
 		self.depth_error = data.data
+		self.controller_time = time.time()
 
 	def convergence_callback(self, data):
 		self.convergence_error = data.data
@@ -242,7 +247,7 @@ class Autonav:
 		# calculate the change in yaw and see if it's 45 degrees clockwise
 		delta_yaw = self.current_yaw - self.previous_yaw
 		rospy.loginfo('delta yaw: {}'.format(delta_yaw))
-		return delta_yaw <= -math.pi/4
+		return delta_yaw <= -math.pi/3
 
 class PIDController:
 	def __init__(self, kp, ki, kd, set_point, out_min, out_max):

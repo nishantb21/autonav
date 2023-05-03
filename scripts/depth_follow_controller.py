@@ -21,7 +21,7 @@ class DepthFollowController:
 	
 	def depth_image_callback(self, data):
 		depth_image = self.bridge.imgmsg_to_cv2(data, "16UC1")
-		depth_image = depth_image[int(depth_image.shape[0]*0.3):int(depth_image.shape[0]*0.6), 0:depth_image.shape[1]]
+		depth_image = depth_image[int(depth_image.shape[0]*0.3):int(depth_image.shape[0]*0.5), 0:depth_image.shape[1]]
 		self.depth_image = depth_image
 		#cv2.imshow('Cropped Depth Image', self.depth_image)
 		#cv2.waitKey(1)
@@ -40,7 +40,7 @@ class DepthFollowController:
 		if contours:
 			largest_contour = max(contours, key=cv2.contourArea)
 			self.largest_contour.publish(Float64(cv2.contourArea(largest_contour)))
-			if cv2.contourArea(largest_contour) > 6500:
+			if cv2.contourArea(largest_contour) > 4750:
 				# Find the center of mass of the largest contour
 				M = cv2.moments(largest_contour)
 				try:
@@ -49,12 +49,10 @@ class DepthFollowController:
 					h, w = depth_image.shape
 					center_of_image = (int(w / 2), int(h / 2))
 					# Calculate the error difference in the x-direction only
-					self.error = self.center_of_mass[0] - center_of_image[0]
+					self.error = (self.center_of_mass[0] - w/16) - center_of_image[0]
 					# Print the error difference
 					#rospy.loginfo("Error difference: {}".format(self.error))
 					output_error = float((float(self.error)/float(w)))+0.5
-					if (output_error < 0.1) or (output_error > 0.9):
-						output_error = 0.5
 					self.error_pub.publish(Float64(output_error))
 					#rospy.loginfo("Error output: {}".format(output_error))
 
