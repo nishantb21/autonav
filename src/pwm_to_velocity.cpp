@@ -23,10 +23,10 @@ class PWMOdom {
             sub_vel = nh_.subscribe("/velocity_raw", 10, &PWMOdom::callback_pwm_to_vel, this);
             sub_steering = nh_.subscribe("/servo_raw", 10, &PWMOdom::callback_pwm_to_steer, this);
 
-            for (int i = 0; i<steer_vec_len; i++)
-                ROS_INFO_STREAM("steer_curve_y[" << i <<"]: " << steer_curve_y[i]);
-            for (int i = 0; i<vel_vec_len; i++)
-                ROS_INFO_STREAM("vel_curve_y[" << i <<"]: " << vel_curve_y[i]);
+            // for (int i = 0; i<steer_vec_len; i++)
+            //     ROS_INFO_STREAM("steer_curve_y[" << i <<"]: " << steer_curve_y[i]);
+            // for (int i = 0; i<vel_vec_len; i++)
+            //     ROS_INFO_STREAM("vel_curve_y[" << i <<"]: " << vel_curve_y[i]);
         }   
 
         void callback_pwm_to_vel(const std_msgs::UInt32::ConstPtr& msg) {
@@ -46,7 +46,7 @@ class PWMOdom {
 
         void callback_pwm_to_steer(const std_msgs::UInt32::ConstPtr& msg) {
             // Process message received on the subscriber
-            ROS_INFO_STREAM("callback_pwm_to_steer Received message: " << msg->data);
+            //ROS_INFO_STREAM("callback_pwm_to_steer Received message: " << msg->data);
 
             // Create and publish a response message
             std_msgs::Float32 response_msg;
@@ -60,10 +60,10 @@ class PWMOdom {
             // check if sample is out of bounds
             // ROS_INFO_STREAM("in interp() with sample=" << sample_x);
             if (sample_x <= data_x[0]){
-                ROS_INFO_STREAM("pwm_to_velocity: commanded pwm is below data range");
+                //ROS_INFO_STREAM("pwm_to_velocity: commanded pwm is below data range");
                 return data_y[0];
             }else if (sample_x >= data_x[len-1]){
-                ROS_INFO_STREAM("pwm_to_velocity: commanded pwm is above data range");
+                //ROS_INFO_STREAM("pwm_to_velocity: commanded pwm is above data range");
                 return data_y[len-1];
             }
 
@@ -77,7 +77,7 @@ class PWMOdom {
 
             // use point slope form to get point
             float val =  (((data_y[left_ind]-data_y[left_ind+1])/(data_x[left_ind]-data_x[left_ind+1]))*(sample_x-data_x[left_ind])) + data_y[left_ind];
-            ROS_INFO_STREAM("sample_x: "<<sample_x<<", left_ind: " << left_ind<< ", val: " << val <<", data_y[left_ind]: " << data_y[left_ind] << ", data_y[left_ind+1]: " << data_y[left_ind+1] << ", data_x[left_ind]: " << data_x[left_ind] << ", data_x[left_ind+1]: " << data_x[left_ind+1]);
+            //ROS_INFO_STREAM("sample_x: "<<sample_x<<", left_ind: " << left_ind<< ", val: " << val <<", data_y[left_ind]: " << data_y[left_ind] << ", data_y[left_ind+1]: " << data_y[left_ind+1] << ", data_x[left_ind]: " << data_x[left_ind] << ", data_x[left_ind+1]: " << data_x[left_ind+1]);
             return val;
         }
 
@@ -85,6 +85,7 @@ class PWMOdom {
 
     private:
         volatile float cur_vel;
+        float wheel_base;
 
         ros::NodeHandle nh_;
         ros::Publisher pub_vel;
