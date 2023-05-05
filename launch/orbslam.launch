@@ -7,7 +7,8 @@
         <!-- <arg name="initial_reset" value="true" /> -->
     <!-- </include> -->
 
-    <remap from="/camera/deph_regisered/image_raw" to="/camera/depth_registered/image"/>
+    <!-- <remap from="/camera/deph_registered/image_raw" to="/camera/depth_registered/image"/> -->
+    <remap from="/camera/deph_registered/image_raw" to="/camera/depth_registered/points"/>
 
 
     <!-- Inital TF from base_link to map frame Launch -->
