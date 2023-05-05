@@ -18,15 +18,35 @@ class MyNode(object):
         self.rate = rospy.Rate(10)  # 10 Hz
 
     def cornerDetector(self,dimg):
-        kernel = np.array([[1,0,-1],
-                           [10,0,-10],
-                           [1,0,-1]])
 
-        # dimg = cv2.Sobel(src=cv_img, ddepth=-1, dx=3, dy=0,ksize=1)
+
+        ## RESIZE AND BLUR
         dimg = cv2.resize(dimg,dsize=(160,90), interpolation=cv2.INTER_LINEAR)
         dimg = cv2.blur(dimg,(2,2))
+
+        ## VERITCAL LINE FINDING
+        # dimg = cv2.Sobel(src=cv_img, ddepth=-1, dx=1, dy=0,ksize=3)
         # dimg = cv2.Scharr(src=dimg, ddepth=-1, dx=1, dy=0)
-        dimg = cv2.filter2D(dimg, ddepth=-1, kernel=kernel)
+
+        # kernel = np.array([[1,0,-1],
+        #                    [10,0,-10],
+        #                    [1,0,-1]])
+
+        # sobel5x = cv2.getDerivKernels(0, 1, 5)
+        # kernel = -1*np.outer(sobel5x[0], sobel5x[1])
+
+        vert_kernel = np.array([[-1, -1, -1, 0, 1, 1, 1],
+                                [-1, -1, -1, 0, 1, 1, 1],
+                                [-1, -1, -1, 0, 1, 1, 1],
+                                [-1, -1, -1, 0, 1, 1, 1],
+                                [-1, -1, -1, 0, 1, 1, 1],
+                                [-1, -1, -1, 0, 1, 1, 1],
+                                [-1, -1, -1, 0, 1, 1, 1],])#########jgjgjgjgjgjgjgjgjgjgjgjgjjjjjjjjjjjjjjj
+        dimg = cv2.filter2D(dimg, ddepth=-1, kernel=-1*vert_kernel)
+        # dimg = cv2.filter2D(dimg, ddepth=-1, kernel=vert_kernal)
+
+        
+        ##PUBLISH DEBUG
         ros_img = self.bridge.cv2_to_imgmsg(dimg)
         self.pub_corner_debug.publish(ros_img)
 
