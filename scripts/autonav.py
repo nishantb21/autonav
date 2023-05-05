@@ -105,7 +105,7 @@ class Autonav:
 	                                        self.previous_yaw = None
 	                                        self.desired_time = None
 
-					self.steering_input.publish(UInt32(1900))
+					self.steering_input.publish(UInt32(1950))
 					self.velocity_input.publish(UInt32(turn_speed)) 
 				else:
 					rospy.loginfo('WAITING FOR TURN')
