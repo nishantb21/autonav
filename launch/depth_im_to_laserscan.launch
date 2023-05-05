@@ -1,0 +1,18 @@
+<launch>
+  <!-- Load the depthimage_to_laserscan node -->
+  <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+
+    <!-- Set the input depth image topic -->
+    <param name="image" value="/camera/depth/image_raw"/>
+
+    <!-- Set the output laser scan topic -->
+    <param name="scan" value="/scan"/>
+
+    <!-- Set optional parameters (you can adjust these based on your needs) -->
+    <param name="output_frame_id" value="base_link"/>
+    <param name="range_min" value="0.45"/>
+    <param name="range_max" value="10.0"/>
+    <param name="scan_height" value="1"/>
+    <param name="depthimage_row_step" value="1"/>
+  </node>
+</launch>

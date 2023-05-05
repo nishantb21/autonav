@@ -1,0 +1,7 @@
+<launch>
+
+    <include file="$(find autonav)/launch/robot_localization.launch"/>
+    <include file="$(find autonav)/launch/depth_im_to_laserscan.launch"/>
+
+    
+
