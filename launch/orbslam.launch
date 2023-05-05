@@ -3,7 +3,15 @@
     <include file="$(find orb_slam2_ros)/ros/launch/orb_slam2_d435_rgbd.launch"/>
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
 
+    <!-- <node type="rviz" name="rviz" pkg="rviz" args="-d $(find orbslam_rviz)/orbslam_rviz.rviz"/> -->
+
+    <remap from="/camera/deph_regisered/image_raw" to="/camera/depth_registered/image"/>
+
+    <!-- <param name="initial_reset" type="bool" value="1"/> -->
     <!-- Call URDF links -->
     <param name="robot_description" command="cat $(find autonav)/urdf/autonav_bot.urdf" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <!-- Launch octomap to convert pointcloud -->
+    <!-- <include file="$(find autonav)/launch/occ_map.launch"/> -->
 </launch>
