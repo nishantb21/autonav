@@ -2,6 +2,7 @@
 #include <std_msgs/String.h>
 #include <std_msgs/UInt32.h>
 #include <sensor_msgs/Imu.h>
+#include <geometry_msgs/Pose2D.h>
 
 //used for keeping track of the state of the robot
 struct state{  
@@ -30,7 +31,7 @@ class DynModel {
             
             // Initialize subscribers
             sub_imu = nh_.subscribe("/imu/data", 10, &DynModel::callback_imu, this);
-            sub_known_state = nh_.subscribe("/known_state", 10, &DynModel::callback_known_state, this);
+            sub_known_state = nh_.subscribe("/known_state", 10, &DynModel::callback_known_state, this); 
             sub_velocity_raw = nh_.subscribe("/velocity_raw", 10, &DynModel::callback_imu, this);
             sub_servo_raw = nh_.subscribe("/servo_raw", 10, &DynModel::callback_imu, this);
 
@@ -51,43 +52,54 @@ class DynModel {
         }
 
         // update this->modeled_state.x/y/theta with pose
-        void callback_known_state(const  geometry_msgs::pose2D::ConstPtr& msg){
-            modeled_state->x = msg->x;
-            modeled_state->y = msg->y;
-            modeled_state->theta = msg->theta;
+        void callback_known_state(const  geometry_msgs::Pose2D::ConstPtr& msg){
+            modeled_state.x = msg->x;
+            modeled_state.y = msg->y;
+            modeled_state.theta = msg->theta;
             return;
         }
 
         // update this->modeled_state->x_dot with pose
         void callback_velocity_raw(const  std_msgs::UInt32::ConstPtr& msg){
-            modeled_state->x_dot = pwm2vel(msg->data);
+            //modeled_state->x_dot = pwm2vel(msg->data);
             return;
         }
 
         void callbacK_servo_raw(const std_msgs::UInt32::ConstPtr& msg){
-            modeled_state->steering_angle = pwm2steeringang(msg->data);
+            //modeled_state->steering_angle = pwm2steeringang(msg->data);
             return;
         }
 
+        float pwm2steeringang(std_msgs::UInt32 pwm){
+            //TODO
+            return float(pwm.data);
+        }
+
         void updateKnownState(state cur_state){
-            modeled_state = cur_state;
+            this->modeled_state = cur_state;
         }
 
         void modelDynamics(){
             while (ros::ok){
 
                 if (reset){
-                    this->cur_modeled_state = last_known_state;
+                    this->modeled_state = resetState(this->modeled_state);
                 }
 
             }
         }
 
+        state resetState(state s){
+            return s;
+        }
+
     private:
         volatile bool reset;
         float dtime;
+        float turn_radius; //how wide of a turn to take
+        float turn_length; //how long of a turn to take
 
-        volatile state modeled_state;
+        state modeled_state;
         
         ros::NodeHandle nh_;
         ros::Publisher pub_;

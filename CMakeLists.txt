@@ -139,6 +139,7 @@ add_executable(motor_interface src/motor_interface.cpp)
 add_executable(joystick_translator src/joystick_translator.cpp)
 add_executable(ir_node src/ir_node.cpp)
 add_executable(dyn_model src/dyn_model.cpp)
+add_executable(pwm_estimates src/pwm_estimates.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -159,6 +160,7 @@ target_link_libraries(motor_interface ${catkin_LIBRARIES})
 target_link_libraries(joystick_translator ${catkin_LIBRARIES})
 target_link_libraries(ir_node ${catkin_LIBRARIES})
 target_link_libraries(dyn_model ${catkin_LIBRARIES})
+target_link_libraries(pwm_estimates ${catkin_LIBRARIES})
 
 #############
 ## Install ##
