@@ -12,7 +12,7 @@
     <param name="output_frame_id" value="base_link"/>
     <param name="range_min" value="0.45"/>
     <param name="range_max" value="10.0"/>
-    <param name="scan_height" value="1"/>
+    <param name="scan_height" value="4"/>
     <param name="depthimage_row_step" value="1"/>
   </node>
 </launch>
