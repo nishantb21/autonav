@@ -3,5 +3,7 @@
     <include file="$(find autonav)/launch/robot_localization.launch"/>
     <include file="$(find autonav)/launch/depth_im_to_laserscan.launch"/>
 
-    
+    <!-- Need to include the pwm velocity publisher launch -->
+    <node pkg="autonav" name="pwm_estimates" type="pwm_estimates" output="screen" />
+
 
