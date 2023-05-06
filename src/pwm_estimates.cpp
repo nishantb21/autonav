@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/UInt32.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <math.h>
 
 class PWMOdom {
@@ -12,7 +13,7 @@ class PWMOdom {
         float vel_curve_y[vel_vec_len] = {-2.5, 0,    2.5,  3.5,  4.5};
 
         float steer_curve_x[steer_vec_len] = {1000, 1500, 2000};
-        float steer_curve_y[steer_vec_len] = {-0.785, 0, 0.785}; //45 deg in radians
+        float steer_curve_y[steer_vec_len] = {0.785, 0, -0.785}; //45 deg in radians
 
         PWMOdom() : nh_("~") {
             wheel_base = .15; //check this?
@@ -21,7 +22,7 @@ class PWMOdom {
             // Initialize publisher
             pub_vel = nh_.advertise<std_msgs::Float32>("pwm_to_velocity", 10);
             pub_steering_ang = nh_.advertise<std_msgs::Float32>("pwm_to_steering_ang", 10);
-            pub_ang_vel = nh_.advertise<std_msgs::Float32>("pwm_ang_vel", 10);
+            pub_twist = nh_.advertise<geometry_msgs::TwistStamped>("pwm_twist", 10);
 
             // Initialize subscriber
             sub_vel = nh_.subscribe("/velocity_raw", 10, &PWMOdom::callback_pwm_to_vel, this);
@@ -54,9 +55,25 @@ class PWMOdom {
             // ROS_INFO_STREAM("Received return from interp: " << response_msg.data);
             pub_steering_ang.publish(response_msg);
 
-            std_msgs::Float32 angvel_msg;
-            angvel_msg.data = calcAngVel(response_msg.data);
-            pub_ang_vel.publish(angvel_msg); //publish the angular velocity based on velocity, wheel angle, and wheel base
+            float ang_vel = calcAngVel(response_msg.data);
+
+            geometry_msgs::TwistStamped twist_msg;
+
+            // linear vel
+            twist_msg.twist.linear.x = cur_vel;
+            twist_msg.twist.linear.y = 0;
+            twist_msg.twist.linear.z = 0;
+
+            //angular 
+            twist_msg.twist.angular.y = 0;
+            twist_msg.twist.angular.x = 0;
+            twist_msg.twist.angular.z = ang_vel;
+            
+            //header
+            twist_msg.header.frame_id = "base_link";
+            twist_msg.header.stamp = ros::Time::now();
+            
+            pub_twist.publish(twist_msg); //publish the angular velocity based on velocity, wheel angle, and wheel base
             return;
         } 
 
@@ -98,7 +115,7 @@ class PWMOdom {
 
         ros::NodeHandle nh_;
         ros::Publisher pub_vel;
-        ros::Publisher pub_ang_vel;
+        ros::Publisher pub_twist;
         ros::Publisher pub_steering_ang;
         ros::Subscriber sub_vel;
         ros::Subscriber sub_steering;
