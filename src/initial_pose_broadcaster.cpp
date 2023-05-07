@@ -8,21 +8,26 @@ int main(int argc, char **argv) {
 
     tf2_ros::TransformBroadcaster broadcaster;
 
-    geometry_msgs::TransformStamped transformStamped;
-    transformStamped.header.stamp = ros::Time::now();
-    transformStamped.header.frame_id = "map";
-    transformStamped.child_frame_id = "base_link";
-    transformStamped.transform.translation.x = 0.0;
-    transformStamped.transform.translation.y = 0.0;
-    transformStamped.transform.translation.z = 0.0;
-    transformStamped.transform.rotation.x = 0.0;
-    transformStamped.transform.rotation.y = 0.0;
-    transformStamped.transform.rotation.z = 0.0;
-    transformStamped.transform.rotation.w = 1.0;
-    ROS_INFO_STREAM("HERRRRREEEEEEE");
+    ros::Rate rate(10.0);
 
-    //Broadcast initial position and link map and base_link frames
-    broadcaster.sendTransform(transformStamped);
+    while (ros.ok()) {
+        geometry_msgs::TransformStamped transformStamped;
+        transformStamped.header.stamp = ros::Time::now();
+        transformStamped.header.frame_id = "map";
+        transformStamped.child_frame_id = "base_link";
+        transformStamped.transform.translation.x = 0.0;
+        transformStamped.transform.translation.y = 0.0;
+        transformStamped.transform.translation.z = 0.0;
+        transformStamped.transform.rotation.x = 0.0;
+        transformStamped.transform.rotation.y = 0.0;
+        transformStamped.transform.rotation.z = 0.0;
+        transformStamped.transform.rotation.w = 1.0;
+        ROS_INFO_STREAM("HERRRRREEEEEEE");
 
-    // ros::spin();
+        //Broadcast initial position and link map and base_link frames
+        broadcaster.sendTransform(transformStamped);
+
+        rate.sleep();
+    }
+
 }
