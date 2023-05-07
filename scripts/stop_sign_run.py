@@ -52,7 +52,7 @@ class StopSignRun:
 	def run(self):
 		if (self.start):
 			
-			if (self.stop_sign):
+			if (self.stop_sign is True):
 				rospy.loginfo('STOP SIGN')
 				self.velocity_input.publish(UInt32(1500))
 			else:
@@ -61,8 +61,10 @@ class StopSignRun:
 		
 	def stop_sign_callback(self, data):
 		if (data.data):
+			rospy.loginfo('STOP')
 			self.stop_sign = True
 		else:
+			rospy.loginfo('NO STOP')
 			self.stop_sign = False
 
 	def getKey(self, settings, timeout):
