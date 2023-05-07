@@ -143,6 +143,11 @@
         <arg name="ordered_pc"               value="$(arg ordered_pc)"/>
     </include>
 
+
+    <node name="servo_interface" pkg="autonav" type="servo_interface" output="screen"/>
+    <node name="motor_interface" pkg="autonav" type="motor_interface" output="screen"/>
+    
     <node name="stop_sign_detection" pkg="autonav" type="stop_sign_detection.py" output="screen"/>
+    <node name="stop_sign_run" pkg="autonav" type="stop_sign_run.py" output="screen"/>
 
 </launch>
