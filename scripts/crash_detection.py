@@ -29,5 +29,10 @@ class CrashDetection:
 		else:
 			self.crash_pub.publish(Bool(False))
 
-
+if __name__ == '__main__':
+	try:
+		auto = CrashDetection()
+		rospy.spin()
+	except rospy.ROSInterruptException:
+		pass
 		
