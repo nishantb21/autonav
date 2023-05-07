@@ -60,6 +60,7 @@ class StopSignRun:
 				self.velocity_input.publish(UInt32(straight_speed))
 		
 	def stop_sign_callback(self, data):
+		rospy.loginfo('RECIEVED')
 		if (data.data):
 			rospy.loginfo('STOP')
 			self.stop_sign = True

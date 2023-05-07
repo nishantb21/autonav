@@ -83,8 +83,8 @@ class StopSignDetector():
 
 			self.detect_buffer = np.full(buffer, False)
 
-		cv2.imshow('mask',mask)
-		cv2.waitKey(1)
+		#cv2.imshow('mask',mask)
+		#cv2.waitKey(1)
 
 
 if __name__=='__main__':

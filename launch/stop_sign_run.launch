@@ -94,7 +94,7 @@
 
         <arg name="depth_width"              value="$(arg depth_width)"/>
         <arg name="depth_height"             value="$(arg depth_height)"/>
-        <arg name="enable_depth"             value="$(arg enable_depth)"/>
+        <arg name="enable_depth"             value="false"/>
 
         <arg name="confidence_width"         value="$(arg confidence_width)"/>
         <arg name="confidence_height"        value="$(arg confidence_height)"/>
@@ -103,7 +103,7 @@
 
         <arg name="color_width"              value="$(arg color_width)"/>
         <arg name="color_height"             value="$(arg color_height)"/>
-        <arg name="enable_color"             value="false"/>
+        <arg name="enable_color"             value="true"/>
 
         <arg name="infra_width"              value="$(arg infra_width)"/>
         <arg name="infra_height"             value="$(arg infra_height)"/>
