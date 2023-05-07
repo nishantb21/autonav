@@ -30,7 +30,7 @@
 
   <!-- Define the transformation between base_link and imu_link -->
   <joint name="base_to_imu_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0 -0.01" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="imu"/>
   </joint>

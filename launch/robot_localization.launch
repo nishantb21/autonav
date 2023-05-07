@@ -18,7 +18,7 @@
   <!-- Load robot_localization ekf_localization_node -->
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
     <!-- Set frequency -->
-    <param name="frequency" value="30"/>
+    <param name="frequency" value="10"/>
 
     <!-- Provide frames for localization -->
     <param name="odom_frame" value="odom" />
@@ -28,7 +28,7 @@
 
 
     <!-- Configure sensor inputs -->
-    <param name="sensor_timeout" value="0.1"/>
+    <param name="sensor_timeout" value="0.2"/>
     <param name="two_d_mode" value="true"/>
 
     <!-- IMU input -->
