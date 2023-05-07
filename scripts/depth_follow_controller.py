@@ -6,6 +6,8 @@ from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 
+mode = rospy.get_param('/autonav/mode')
+
 class DepthFollowController:
 	def __init__(self):
 		rospy.init_node('depth_follow_controller')
@@ -59,7 +61,10 @@ class DepthFollowController:
 					h, w = depth_image.shape
 					center_of_image = (int(w / 2), int(h / 2))
 					# Calculate the error difference in the x-direction only
-					self.error = (self.center_of_mass[0] - w/16) - center_of_image[0]
+					if (mode is "counterclockwise"):
+						self.error = (self.center_of_mass[0] + w/16) - center_of_image[0]
+					else:
+						self.error = (self.center_of_mass[0] - w/16) - center_of_image[0]
 					# Print the error difference
 					#rospy.loginfo("Error difference: {}".format(self.error))
 					output_error = float((float(self.error)/float(w)))+0.5

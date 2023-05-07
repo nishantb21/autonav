@@ -1,4 +1,8 @@
 <launch>
+  <arg name="mode" default="clockwise">
+
+
+
     <arg name="serial_no"           default=""/>
     <arg name="usb_port_id"         default=""/>
     <arg name="device_type"         default=""/>
@@ -156,8 +160,13 @@
     <node name="motor_interface" pkg="autonav" type="motor_interface" output="screen"/>
     <!-- <node name="ir_node" pkg="autonav" type="ir_node" output="screen"/> -->
     
-    <node name="autonav" pkg="autonav" type="autonav.py" output="screen"/>
-    <node name="depth_follow_controller" pkg="autonav" type="depth_follow_controller.py" output="screen"/>
+    <node name="autonav" pkg="autonav" type="autonav.py" output="screen">
+      <param name="mode" value="$(arg mode)" />
+    </node>
+
+    <node name="depth_follow_controller" pkg="autonav" type="depth_follow_controller.py" output="screen">
+      <param name="mode" value="$(arg mode)" />
+    </node>
     <!-- node name="stop_sign_detection" pkg="autonav" type="stop_sign_detection.py" output="screen"/> -->
     <!-- <node name="hallway_convergence_controller" pkg="autonav" type="hallway_convergence_controller.py" output="screen"/> -->
     <!-- <node name="ball_detection" pkg="autonav" type="ball_detection.py" output="screen"/> -->

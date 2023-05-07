@@ -12,7 +12,7 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
-straight_speed = 1540
+straight_speed = 1550
 
 class StopSignRun:
 	def __init__(self):
@@ -86,7 +86,7 @@ if __name__ == '__main__':
 		while not rospy.is_shutdown():
 			auto.run()
 		# register the save_plot function to be called when the node is killed
-		atexit.register(auto.save_plot())
+		#atexit.register(auto.save_plot())
 		rospy.spin()
 	except rospy.ROSInterruptException:
 		pass

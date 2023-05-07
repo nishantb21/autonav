@@ -12,6 +12,8 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
+mode = rospy.get_param('/autonav/mode')
+
 straight_speed = 1630
 turn_speed = 1540
 time_delay = 0.0
@@ -35,6 +37,8 @@ class Autonav:
 
 		self.depth_turn = rospy.Subscriber('/depth_turn_indicator', Bool, self.depth_turn_callback)
 		self.imu_turn = rospy.Publisher('/imu_turn', Bool, queue_size=10)
+
+		self.crash = rospy.Subscriber('/crash', Bool, self.crash_callback)
 
 		self.imu = rospy.Subscriber('/imu/data', Imu, self.imu_callback, queue_size=1)
 
@@ -65,6 +69,8 @@ class Autonav:
 
 		self.desired_time = None
 
+		self.crash = False
+
 		self.velocity_input.publish(UInt32(1500))
 		self.steering_input.publish(UInt32(1500))  
 
@@ -87,7 +93,19 @@ class Autonav:
 
 	def run(self):
 		if (self.start):
-			if (self.depth_turn_value is True) or (self.imu_turn_value is True):
+			if (self.crash is True):
+				self.velocity_input.publish(UInt32(1500))
+				self.steering_input.publish(UInt32(1500))
+				time.sleep(1)
+				self.velocity_input.publish(UInt32(1300))
+				time.sleep(0.25)
+				self.velocity_input.publish(UInt32(1500))
+				time.sleep(0.5)
+				self.depth_turn_value = False
+				self.imu_turn_value = False
+				self.crash = False
+
+			elif (self.depth_turn_value is True) or (self.imu_turn_value is True):
 				if self.desired_time is None:
 					rospy.loginfo('TIME: {}'.format(self.desired_time))
 					self.desired_time = time.time() + time_delay
@@ -102,15 +120,19 @@ class Autonav:
 						self.imu_turn_value = not self.is_turn_finsihed()
 
 					if self.imu_turn_value is False:
-	                                        self.previous_yaw = None
-	                                        self.desired_time = None
+						self.previous_yaw = None
+						self.desired_time = None
 
-					self.steering_input.publish(UInt32(1950))
+					if (mode is "counterclockwise"):
+						self.steering_input.publish(UInt32(1050))
+					else:
+						self.steering_input.publish(UInt32(1950))
+
 					self.velocity_input.publish(UInt32(turn_speed)) 
 				else:
-					rospy.loginfo('WAITING FOR TURN')
-					
-			if self.is_ball_detected:
+					rospy.loginfo('WAITING FOR TURN')	
+
+			elif self.is_ball_detected:
 				rospy.loginfo('AVOIDING BALL!!')
 				error = self.ball_position_to_error(self.ball_position)
 				#self.steering_pid.set_point = error
@@ -119,6 +141,7 @@ class Autonav:
 				PWM = control
 				rospy.loginfo('command sent: {}'.format(PWM))
 				self.steering_input.publish(UInt32(PWM))
+
 			else:
 				rospy.loginfo('depth_error: {}'.format((self.depth_error*1000 + 1000)))
 				#rospy.loginfo('convergence_error: {}'.format((self.convergence_error*1000 + 1000)))
@@ -175,6 +198,12 @@ class Autonav:
 			self.stop_sign = True
 		else:
 			self.stop_sign = False
+
+	def crash_callback(self, data):
+		if (data.data):
+			self.crash = True
+		else:
+			self.crash = False
 
 	def getKey(self, settings, timeout):
 		tty.setraw(sys.stdin.fileno())
@@ -247,7 +276,10 @@ class Autonav:
 		# calculate the change in yaw and see if it's 45 degrees clockwise
 		delta_yaw = self.current_yaw - self.previous_yaw
 		rospy.loginfo('delta yaw: {}'.format(delta_yaw))
-		return delta_yaw <= -math.pi/3
+		if (mode is "counterclockwise"):
+			return delta_yaw <= math.pi/3
+		else:
+			return delta_yaw <= -math.pi/3
 
 class PIDController:
 	def __init__(self, kp, ki, kd, set_point, out_min, out_max):
