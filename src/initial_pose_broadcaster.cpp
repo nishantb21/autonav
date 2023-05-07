@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
     transformStamped.transform.rotation.y = 0.0;
     transformStamped.transform.rotation.z = 0.0;
     transformStamped.transform.rotation.w = 1.0;
+    ROS_INFO_STREAM("HERRRRREEEEEEE");
 
     //Broadcast initial position and link map and base_link frames
     broadcaster.sendTransform(transformStamped);

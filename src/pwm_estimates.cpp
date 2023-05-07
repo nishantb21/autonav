@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/UInt32.h>
-#include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <math.h>
 
 class PWMOdom {
@@ -22,7 +22,7 @@ class PWMOdom {
             // Initialize publisher
             pub_vel = nh_.advertise<std_msgs::Float32>("pwm_to_velocity", 10);
             pub_steering_ang = nh_.advertise<std_msgs::Float32>("pwm_to_steering_ang", 10);
-            pub_twist = nh_.advertise<geometry_msgs::TwistStamped>("pwm_twist", 10);
+            pub_twist = nh_.advertise<geometry_msgs::TwistWithCovarianceStamped>("pwm_twist", 10);
 
             // Initialize subscriber
             sub_vel = nh_.subscribe("/velocity_raw", 10, &PWMOdom::callback_pwm_to_vel, this);
@@ -57,17 +57,21 @@ class PWMOdom {
 
             float ang_vel = calcAngVel(response_msg.data);
 
-            geometry_msgs::TwistStamped twist_msg;
+            geometry_msgs::TwistWithCovarianceStamped twist_msg;
 
             // linear vel
-            twist_msg.twist.linear.x = cur_vel;
-            twist_msg.twist.linear.y = 0;
-            twist_msg.twist.linear.z = 0;
+            twist_msg.twist.twist.linear.x = cur_vel;
+            twist_msg.twist.twist.linear.y = 0;
+            twist_msg.twist.twist.linear.z = 0;
 
             //angular 
-            twist_msg.twist.angular.y = 0;
-            twist_msg.twist.angular.x = 0;
-            twist_msg.twist.angular.z = ang_vel;
+            twist_msg.twist.twist.angular.y = 0;
+            twist_msg.twist.twist.angular.x = 0;
+            twist_msg.twist.twist.angular.z = ang_vel;
+
+            // for(int i=0; i<36; i++){
+            //     twist_msg.twist.covariance[i] = 0;
+            // }
             
             //header
             twist_msg.header.frame_id = "base_link";

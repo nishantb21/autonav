@@ -5,7 +5,7 @@
   <link name="base_link"/>
 
   <!-- Define the camera_link frame -->
-  <link name="camera_link">
+  <link name="camera">
     <visual>
       <geometry>
         <box size="0.02 0.06 0.02"/>
@@ -13,7 +13,7 @@
     </visual>
   </link>
 
-  <link name="imu_link">
+  <link name="imu">
     <visual>
         <geometry>
             <box size="0.04 0.03 0.02"/>
@@ -25,14 +25,14 @@
   <joint name="base_to_camera_joint" type="fixed">
     <origin xyz="0.1 0.0 0.0" rpy="0 0 0"/>
     <parent link="base_link"/>
-    <child link="camera_link"/>
+    <child link="camera"/>
   </joint>
 
   <!-- Define the transformation between base_link and imu_link -->
   <joint name="base_to_imu_joint" type="fixed">
-    <origin xyz="0 0 -.01" rpy="0 0 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
     <parent link="base_link"/>
-    <child link="imu_link"/>
+    <child link="imu"/>
   </joint>
 
 </robot>
