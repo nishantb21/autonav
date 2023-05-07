@@ -21,7 +21,7 @@ class CrashDetection:
 		accel_x = data.linear_acceleration.x
 		
 		if (self.prev_accel_x is None):
-	                self.prev_accel_x = accel_x
+			self.prev_accel_x = accel_x
 			self.crash_pub.publish(Bool(False))
 		else:
 			self.mag_accel_x = accel_x - self.prev_accel_x
