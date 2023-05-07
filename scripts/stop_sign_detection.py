@@ -36,9 +36,9 @@ class StopSignDetector():
 		mask1 = cv2.inRange(hsv, lower_red, upper_red)
 
 		lower_red = np.array([170, 70, 50])
-                upper_red = np.array([180, 255, 255])
+		upper_red = np.array([180, 255, 255])
 
-                mask2 = cv2.inRange(hsv, lower_red, upper_red)
+		mask2 = cv2.inRange(hsv, lower_red, upper_red)
 
 		mask = mask1 | mask2
 
@@ -58,12 +58,14 @@ class StopSignDetector():
 
 		# Iterate over each contour and check if it is an octagon
 		contours = sorted(contours, key=cv2.contourArea, reverse=True)
-		cv2.drawContours(img, contours[0], 0, (0,255,0), 5)
-		approx = cv2.approxPolyDP(contours[0], cv2.arcLength(contours[0], True) * 0.01, True)
-		if len(approx) == 8:
-				# If an octagon is found, return True
-				#rospy.loginfo("Detected?: {}".format(True))
-			is_detected = True
+		for contour in contours[:3]:
+			cv2.drawContours(img, contour, 0, (0,255,0), 5)
+			approx = cv2.approxPolyDP(contour, cv2.arcLength(contours[0], True) * 0.01, True)
+			if len(approx) == 8:
+					# If an octagon is found, return True
+					#rospy.loginfo("Detected?: {}".format(True))
+				is_detected = True
+				break
 		else:
 				# If no octagon isrospy.loginfo("Error difference: {}".format(self.error)) found, return False
 				#rospy.loginfo("Detected?: {}".format(False))
@@ -82,7 +84,7 @@ class StopSignDetector():
 			self.detect_buffer = np.full(buffer, False)
 
 		cv2.imshow('mask',mask)
-                cv2.waitKey(1)
+		cv2.waitKey(1)
 
 
 if __name__=='__main__':
