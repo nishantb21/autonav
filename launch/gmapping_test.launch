@@ -3,8 +3,12 @@
     <include file="$(find autonav)/launch/robot_localization.launch"/>
     <include file="$(find autonav)/launch/depth_im_to_laserscan.launch"/>
 
+    <node pkg="robot_localization" type="ekf_localization_node" name="map_ekf" clear_params="true">
+        <rosparam command="load" file="$(find autonav)/config/map_ekf.yaml"/>
+    </node>
+
     <!-- Need to include the pwm velocity publisher launch -->
-    <node pkg="autonav" name="pwm_estimates" type="pwm_estimates" output="screen" />
+    <!-- <node pkg="autonav" name="pwm_estimates" type="pwm_estimates" output="screen" /> -->
 
       <!-- Load the slam_gmapping node -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
