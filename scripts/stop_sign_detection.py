@@ -76,7 +76,7 @@ class StopSignDetector():
 		self.detect_iterator += 1
 		if (self.detect_iterator >= (buffer - 2)):
 			self.detect_iterator = 0
-			if np.count_nonzero(self.detect_buffer) > 2:
+			if np.count_nonzero(self.detect_buffer) > 5:
 				self.publisher.publish(Bool(True))
 			else:
 				self.publisher.publish(Bool(False))

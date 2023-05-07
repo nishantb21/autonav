@@ -14,8 +14,9 @@ import atexit
 
 mode = rospy.get_param('/autonav/mode')
 
-straight_speed = 1630
+straight_speed = 1600
 turn_speed = 1540
+reverse_speed = 1440
 time_delay = 0.0
 
 class Autonav:
@@ -90,17 +91,18 @@ class Autonav:
 
 		rospy.loginfo('done')
 		self.start = True
+		self.crash_ignore_time = time.time()
 
 	def run(self):
 		if (self.start):
-			if (self.crash is True):
+			if (self.crash is True) and ((time.time() - self.crash_ignore_time) > 1):
 				self.velocity_input.publish(UInt32(1500))
 				self.steering_input.publish(UInt32(1500))
+				time.sleep(2)
+				self.velocity_input.publish(UInt32(reverse_speed))
 				time.sleep(1)
-				self.velocity_input.publish(UInt32(1300))
-				time.sleep(0.25)
 				self.velocity_input.publish(UInt32(1500))
-				time.sleep(0.5)
+				time.sleep(2)
 				self.depth_turn_value = False
 				self.imu_turn_value = False
 				self.crash = False

@@ -12,7 +12,7 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
-straight_speed = 1550
+straight_speed = 1540
 
 class StopSignRun:
 	def __init__(self):
@@ -48,13 +48,24 @@ class StopSignRun:
 
 		rospy.loginfo('done')
 		self.start = True
+		self.ignore = False
+		self.time_to_ignore = time.time()
 
 	def run(self):
 		if (self.start):
 			
-			if (self.stop_sign is True):
+			if (self.stop_sign is True) and (self.ignore is False):
 				rospy.loginfo('STOP SIGN')
 				self.velocity_input.publish(UInt32(1500))
+				self.time_to_ignore = time.time()
+				self.ignore = True
+			elif self.ignore is True:
+				if (time.time() - self.time_to_ignore) > 5:
+					self.ignore = False
+					self.velocity_input.publish(UInt32(straight_speed))
+					time.sleep(3)
+				else:
+					self.velocity_input.publish(UInt32(1500))
 			else:
 				rospy.loginfo('FORWARD!!')
 				self.velocity_input.publish(UInt32(straight_speed))

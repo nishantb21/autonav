@@ -25,7 +25,7 @@ class CrashDetection:
 			self.crash_pub.publish(Bool(False))
 		else:
 			self.mag_accel_x = accel_x - self.prev_accel_x
-			if (self.mag_accel_x < -2):
+			if (self.mag_accel_x < -3):
 				self.crash_pub.publish(Bool(True))
 				self.crash_timer = time.time()
 			elif (time.time() - self.crash_timer) < 1:
