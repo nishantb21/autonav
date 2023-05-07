@@ -1,10 +1,18 @@
 <launch>
-    <!--<include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
       <arg name="align_depth" value="false"/>
       <arg name="initial_reset" value="true"/>
-    </include>-->
+    </include>
 
-    <param name="velocity_upper" type="int" value="1600" />
+    <include file="$(find phidgets_imu)/launch/imu.launch" />
+
+    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="ImuFilter">
+      <param name="_use_mag" value="false"/>
+      <param name="_publish_tf" value="false"/>
+      <param name="_world_frame" value="enu"/>
+    </node>
+
+    <param name="velocity_upper" type="int" value="1575" />
     <node name="joy_node" pkg="joy" type="joy_node" output="screen" />
     <node name="joystick_translator" pkg="autonav" type="joystick_translator" output="screen"/>
     <node name="servo_interface" pkg="autonav" type="servo_interface" output="screen"/>

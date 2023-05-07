@@ -21,7 +21,7 @@ class DepthFollowController:
 	
 	def depth_image_callback(self, data):
 		depth_image = self.bridge.imgmsg_to_cv2(data, "16UC1")
-		depth_image = depth_image[int(depth_image.shape[0]*0.3):int(depth_image.shape[0]*0.5), 0:depth_image.shape[1]]
+		depth_image = depth_image[int(depth_image.shape[0]*0.33):int(depth_image.shape[0]*0.66), 0:depth_image.shape[1]]
 		self.depth_image = depth_image
 		#cv2.imshow('Cropped Depth Image', self.depth_image)
 		#cv2.waitKey(1)
@@ -32,6 +32,12 @@ class DepthFollowController:
 		
 		# Apply thresholding
 		ret, thresh = cv2.threshold(depth_image, 127, 255, cv2.THRESH_BINARY)
+		depth_clip_upper = thresh[0:int(thresh.shape[0]*0.5), 0:thresh.shape[1]]
+		depth_clip_lower = thresh[int(thresh.shape[0]*0.5):thresh.shape[0], 0:thresh.shape[1]]
+		#cv2.imshow('upper', depth_clip_upper)
+		#cv2.imshow('lower', depth_clip_lower)
+		#cv2.waitKey(1)
+
 		# Find the contours of the white shape
 		_, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 		#_, contours, _ = cv2.findContours(depth_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -40,7 +46,11 @@ class DepthFollowController:
 		if contours:
 			largest_contour = max(contours, key=cv2.contourArea)
 			self.largest_contour.publish(Float64(cv2.contourArea(largest_contour)))
-			if cv2.contourArea(largest_contour) > 4750:
+			#print("upper")
+			#print(np.sum(depth_clip_upper >= 250))
+			#print("lower")
+			#print(np.sum(depth_clip_lower >= 250))
+			if (np.sum(depth_clip_upper >= 250) > 7000):
 				# Find the center of mass of the largest contour
 				M = cv2.moments(largest_contour)
 				try:

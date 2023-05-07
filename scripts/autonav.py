@@ -12,7 +12,7 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
-straight_speed = 1680
+straight_speed = 1630
 turn_speed = 1540
 time_delay = 0.0
 
@@ -127,7 +127,7 @@ class Autonav:
 				#control = self.steering_pid.update()
 				control = (normalized_error*1000.0 + 1000.0)
 				error_temp = control - 1500.0
-				error_temp *= 1.5
+				error_temp *= 1.35
 				control = np.clip(1500 + error_temp,1000.0,2000.0)
 				rospy.loginfo('controller output: {}'.format(control))
 				self.last_input = control
