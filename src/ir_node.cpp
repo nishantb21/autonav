@@ -40,7 +40,7 @@ class IRNode {
     public:
         int main(int argc, char **argv) {
             pub = nh.advertise<std_msgs::UInt32>("ir_raw", 1);
-            ros::Rate loop_rate(10);
+            ros::Rate loop_rate(100);
 
             ROS_INFO("Waiting for the device to be ready");
             while(file_descriptor == -1) {

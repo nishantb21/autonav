@@ -1,8 +1,4 @@
 <launch>
-    <arg name="mode" default="clockwise"/>
-
-
-
     <arg name="serial_no"           default=""/>
     <arg name="usb_port_id"         default=""/>
     <arg name="device_type"         default=""/>
@@ -98,7 +94,7 @@
 
         <arg name="depth_width"              value="$(arg depth_width)"/>
         <arg name="depth_height"             value="$(arg depth_height)"/>
-        <arg name="enable_depth"             value="$(arg enable_depth)"/>
+        <arg name="enable_depth"             value="false"/>
 
         <arg name="confidence_width"         value="$(arg confidence_width)"/>
         <arg name="confidence_height"        value="$(arg confidence_height)"/>
@@ -107,7 +103,7 @@
 
         <arg name="color_width"              value="$(arg color_width)"/>
         <arg name="color_height"             value="$(arg color_height)"/>
-        <arg name="enable_color"             value="false"/>
+        <arg name="enable_color"             value="true"/>
 
         <arg name="infra_width"              value="$(arg infra_width)"/>
         <arg name="infra_height"             value="$(arg infra_height)"/>
@@ -147,29 +143,11 @@
         <arg name="ordered_pc"               value="$(arg ordered_pc)"/>
     </include>
 
-    <include file="$(find phidgets_imu)/launch/imu.launch" />
 
-    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="ImuFilter">
-      <param name="_use_mag" value="false"/>
-      <param name="_publish_tf" value="false"/>
-      <param name="_world_frame" value="enu"/>
-    </node>
-
-    <param name="velocity_upper" type="int" value="1550" />
     <node name="servo_interface" pkg="autonav" type="servo_interface" output="screen"/>
     <node name="motor_interface" pkg="autonav" type="motor_interface" output="screen"/>
-    <!-- <node name="ir_node" pkg="autonav" type="ir_node" output="screen"/> -->
     
-    <node name="autonav" pkg="autonav" type="autonav.py" output="screen">
-      <param name="mode" value="$(arg mode)"/>
-    </node>
-
-    <node name="depth_follow_controller" pkg="autonav" type="depth_follow_controller.py" output="screen">
-      <param name="mode" value="$(arg mode)"/>
-    </node>
-    <!-- node name="stop_sign_detection" pkg="autonav" type="stop_sign_detection.py" output="screen"/> -->
-    <!-- <node name="hallway_convergence_controller" pkg="autonav" type="hallway_convergence_controller.py" output="screen"/> -->
-    <!-- <node name="ball_detection" pkg="autonav" type="ball_detection.py" output="screen"/> -->
-    <node name="crash_detection" pkg="autonav" type="crash_detection.py" output="screen"/>
+    <node name="stop_sign_detection" pkg="autonav" type="stop_sign_detection.py" output="screen"/>
+    <node name="stop_sign_run" pkg="autonav" type="stop_sign_run.py" output="screen"/>
 
 </launch>
