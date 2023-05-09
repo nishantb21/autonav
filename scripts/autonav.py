@@ -79,21 +79,23 @@ class Autonav:
 
 		self.crash = False
 
+		self.stop = False
+
 		self.velocity_input.publish(UInt32(1500))
 		self.steering_input.publish(UInt32(1500))  
 
-		settings = self.saveTerminalSettings()
-		key_timeout = rospy.get_param("~key_timeout", 0.5)
+		self.settings = self.saveTerminalSettings()
+		self.key_timeout = rospy.get_param("~key_timeout", 0.5)
 
 		t_end = time.time() + 60 * 5.0
 
 		while ((time.time() < t_end) and (not rospy.is_shutdown())):
 			self.steering_input.publish(UInt32(1500))
 			self.velocity_input.publish(UInt32(1500))
-			rospy.loginfo('waiting...')
-			key = self.getKey(settings, key_timeout)
+			rospy.loginfo('waiting to start...')
+			key = self.getKey(self.settings, self.key_timeout)
 			if (key == 'a'):
-				rospy.loginfo('a was pressed')
+				rospy.loginfo('GO was pressed')
 				break
 
 		rospy.loginfo('done')
@@ -119,7 +121,7 @@ class Autonav:
 					rospy.loginfo('TIME: {}'.format(self.desired_time))
 					self.desired_time = time.time() + time_delay
 				elif time.time() >= self.desired_time:
-					rospy.loginfo('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+					rospy.loginfo('IMU turn initiated')
 					rospy.loginfo('yaw: {}'.format(self.yaw))
 					if self.previous_yaw is None:
 						self.previous_yaw = self.yaw
@@ -182,6 +184,14 @@ class Autonav:
 				self.velocity_input.publish(UInt32(straight_speed))
 
 		self.imu_turn.publish(Bool(self.imu_turn_value))
+
+		key = self.getKey(self.settings, self.key_timeout)
+		if (key == 'b'):
+			rospy.loginfo('STOP was pressed')
+			return True
+		else:
+			return False
+			
 
 	def depth_callback(self, data):
 		self.depth_error = data.data
@@ -285,7 +295,7 @@ class Autonav:
 		# calculate the change in yaw and see if it's 45 degrees clockwise
 		delta_yaw = self.current_yaw - self.previous_yaw
 		rospy.loginfo('delta yaw: {}'.format(delta_yaw))
-		if (mode is "counterclockwise"):
+		if (turn_mode is "counterclockwise"):
 			return delta_yaw <= math.pi/3
 		else:
 			return delta_yaw <= -math.pi/3
@@ -336,8 +346,9 @@ class PIDController:
 if __name__ == '__main__':
 	try:
 		auto = Autonav()
-		while not rospy.is_shutdown():
-			auto.run()
+		stop = False
+		while (not rospy.is_shutdown()) and (stop is False):
+			stop = auto.run()
 		# register the save_plot function to be called when the node is killed
 		atexit.register(auto.save_plot())
 		rospy.spin()
