@@ -12,12 +12,14 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
+#settings = saveTerminalSettings()
+
 mode = rospy.get_param('/autonav/mode')
 
-straight_speed = 1600
-turn_speed = 1540
+straight_speed = 1580
+turn_speed = 1580
 reverse_speed = 1440
-time_delay = 0.0
+time_delay = 1.5
 
 class Autonav:
 	def __init__(self):
@@ -329,8 +331,15 @@ class PIDController:
 if __name__ == '__main__':
 	try:
 		auto = Autonav()
+		#settings = saveTerminalSettings()
 		while not rospy.is_shutdown():
 			auto.run()
+			#settings = saveTerminalSettings()
+                	#key_timeout = rospy.get_param("~key_timeout", 0.5)
+			#key = self.getKey(settings, key_timeout)
+			#if (key == 'b'):
+                        #        rospy.loginfo('b was pressed')
+                        #        break
 		# register the save_plot function to be called when the node is killed
 		atexit.register(auto.save_plot())
 		rospy.spin()
