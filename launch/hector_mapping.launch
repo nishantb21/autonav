@@ -1,4 +1,11 @@
 <launch>
+    <!-- publish necessary TFs -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_camera_tf" args="0.0 0 0 0 0 0 1 camera camera_link"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+        <param name="robot_description" command="cat $(find autonav)/urdf/autonav_bot.urdf" />
+
+
+    <!-- Launch Depth2Scan and Robot Localization -->
     <include file="$(find autonav)/launch/depth_im_to_laserscan.launch" />
     <node pkg="robot_localization" type="ekf_localization_node" name="map_ekf" clear_params="true">
         <rosparam command="load" file="$(find autonav)/config/map_ekf.yaml"/>
