@@ -12,12 +12,19 @@ import tty
 import matplotlib.pyplot as plt
 import atexit
 
-mode = rospy.get_param('/autonav/mode')
+turn_mode = rospy.get_param('/autonav/turn_mode')
+speed_mode = rospy.get_param('/autonav/speed_mode')
 
-straight_speed = 1600
-turn_speed = 1540
-reverse_speed = 1440
-time_delay = 0.0
+if (speed_mode is "fast"):
+	straight_speed = 1630
+	turn_speed = 1540
+	reverse_speed = 1440
+	time_delay = 0.0
+else:
+	straight_speed = 1560
+	turn_speed = 1560
+	reverse_speed = 1440
+	time_delay = 1.5
 
 class Autonav:
 	def __init__(self):
@@ -107,7 +114,7 @@ class Autonav:
 				self.imu_turn_value = False
 				self.crash = False
 
-			elif (self.depth_turn_value is True) or (self.imu_turn_value is True):
+			elif ((self.depth_turn_value is True) or (self.imu_turn_value is True)) and (turn_mode is not "straight"):
 				if self.desired_time is None:
 					rospy.loginfo('TIME: {}'.format(self.desired_time))
 					self.desired_time = time.time() + time_delay
@@ -125,7 +132,7 @@ class Autonav:
 						self.previous_yaw = None
 						self.desired_time = None
 
-					if (mode is "counterclockwise"):
+					if (turn_mode is "counterclockwise"):
 						self.steering_input.publish(UInt32(1050))
 					else:
 						self.steering_input.publish(UInt32(1950))

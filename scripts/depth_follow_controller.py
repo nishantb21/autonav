@@ -6,7 +6,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 
-mode = rospy.get_param('/autonav/mode')
+turn_mode = rospy.get_param('/autonav/turn_mode')
 
 class DepthFollowController:
 	def __init__(self):
@@ -38,7 +38,7 @@ class DepthFollowController:
 		depth_clip_lower = thresh[int(thresh.shape[0]*0.5):thresh.shape[0], 0:thresh.shape[1]]
 		#cv2.imshow('upper', depth_clip_upper)
 		#cv2.imshow('lower', depth_clip_lower)
-		#cv2.waitKey(1)
+		cv2.waitKey(1)
 
 		# Find the contours of the white shape
 		_, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -61,10 +61,12 @@ class DepthFollowController:
 					h, w = depth_image.shape
 					center_of_image = (int(w / 2), int(h / 2))
 					# Calculate the error difference in the x-direction only
-					if (mode is "counterclockwise"):
+					if (turn_mode is "counterclockwise"):
 						self.error = (self.center_of_mass[0] + w/16) - center_of_image[0]
-					else:
+					elif (turn_mode is "clockwise"):
 						self.error = (self.center_of_mass[0] - w/16) - center_of_image[0]
+					else:
+						self.error = self.center_of_mass[0] - center_of_image[0]
 					# Print the error difference
 					#rospy.loginfo("Error difference: {}".format(self.error))
 					output_error = float((float(self.error)/float(w)))+0.5

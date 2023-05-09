@@ -81,7 +81,7 @@ class ConvergencePointDetector():
 				#rospy.loginfo("Error output: {}".format(output_error))
 		# Display the image with the convergence point
 		#cv2.imshow("Convergence Point Detector", cv_image)
-		cv2.waitKey(1)
+		#cv2.waitKey(1)
 
 	def line_intersection(self, line1, line2):
 		x1, y1, x2, y2 = line1

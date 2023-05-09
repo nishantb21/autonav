@@ -1,5 +1,6 @@
 <launch>
-    <arg name="mode" default="clockwise"/>
+    <arg name="turn_mode" default="straight"/>
+    <arg name="speed_mode" default="slow"/>
 
 
 
@@ -161,11 +162,12 @@
     <!-- <node name="ir_node" pkg="autonav" type="ir_node" output="screen"/> -->
     
     <node name="autonav" pkg="autonav" type="autonav.py" output="screen">
-      <param name="mode" value="$(arg mode)"/>
+      <param name="turn_mode" value="$(arg turn_mode)"/>
+      <param name="speed_mode" value="$(arg speed_mode)"/>
     </node>
 
     <node name="depth_follow_controller" pkg="autonav" type="depth_follow_controller.py" output="screen">
-      <param name="mode" value="$(arg mode)"/>
+      <param name="turn_mode" value="$(arg turn_mode)"/>
     </node>
     <!-- node name="stop_sign_detection" pkg="autonav" type="stop_sign_detection.py" output="screen"/> -->
     <!-- <node name="hallway_convergence_controller" pkg="autonav" type="hallway_convergence_controller.py" output="screen"/> -->

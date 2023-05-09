@@ -54,7 +54,7 @@ class Visualize:
 		ball_line = int(scaled_ball_position)
 		center_of_image = (int(w / 2), int(h / 2))
 		cv2.line(color_image, (depth_line, 0), (depth_line, h), (0, 0, 255), 2)
-		cv2.putText(color_image, text= str('Depth'), org=(depth_line, 20),
+		cv2.putText(color_image, text= str('Depth'), org=(depth_line, 100),
 			fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
             thickness=2, lineType=cv2.LINE_AA)
 		#cv2.line(color_image, (convergence_line, 0), (convergence_line, h), (0, 255, 0), 2)
@@ -67,7 +67,7 @@ class Visualize:
 				fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
 				thickness=2, lineType=cv2.LINE_AA)
 		cv2.line(color_image, (center_of_image[0], 0), (center_of_image[0], h), (0, 0, 0), 2)
-		cv2.putText(color_image, text= str('Car Center'), org=(center_of_image[0], 10),
+		cv2.putText(color_image, text= str('Car Center'), org=(center_of_image[0], 50),
 	    	fontFace= cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0,0,0),
             thickness=2, lineType=cv2.LINE_AA)
 		cv2.line(color_image, (int(self.PID_output*w), 0), (int(self.PID_output*w), h), (255, 255, 255), 2)
