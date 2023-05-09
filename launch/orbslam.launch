@@ -1,0 +1,29 @@
+<launch>
+    <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tf" args="0 0 0 0 0 0 1 map odom" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_camera_tf" args="0.1 0 0 0 0 0 1 /base_link /camera_link"/>
+    
+    <include file="$(find orb_slam2_ros)/ros/launch/orb_slam2_d435_rgbd.launch"/>
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
+        <!-- <arg name="initial_reset" value="true" /> -->
+    <!-- </include> -->
+
+    <!-- <remap from="/camera/deph_registered/image_raw" to="/camera/depth_registered/image"/> -->
+    <remap from="/camera/deph_registered/image_raw" to="/camera/depth_registered/points"/>
+
+
+    <!-- Inital TF from base_link to map frame Launch -->
+    <node pkg="autonav" name="initial_pose_broadcaster" type="initial_pose_broadcaster" output="screen" />
+    
+    <!-- Frame IDs for ORBSLAM -->
+    <param name="camera_frame_id" type="string" value="camera_link" />
+    <param name="pointcloud_frame_id" type="string" value="map" />
+    <!-- May need to modify -->
+    <!-- <param name="target_frame_id" type="string" value="odom" /> -->
+
+    <!-- Call URDF links -->
+    <param name="robot_description" command="cat $(find autonav)/urdf/autonav_bot.urdf" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <!-- Launch octomap to convert pointcloud -->
+    <!-- <include file="$(find autonav)/launch/occ_map.launch"/> -->
+</launch>

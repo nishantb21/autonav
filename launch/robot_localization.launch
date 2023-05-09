@@ -1,0 +1,73 @@
+<launch>
+  <!-- "odometry" -->
+  <!-- <node pkg="autonav" name="pwm_estimates" type="pwm_estimates" output="screen"/> -->
+
+  <!-- Call URDF links -->
+  <param name="robot_description" command="cat $(find autonav)/urdf/autonav_bot.urdf" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <!-- Add static tf publishers THIS MIGHT BE WRONG-->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_imu_tf" args="0 0 -0.1 0 0 0 1 base_link imu"/> -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_camera_tf" args="0.0 0 0 0 0 0 1 camera camera_link"/>
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_base" args="0.0 0 0 0 0 0 1 map base_link"/> -->
+
+
+  <!-- Inital TF from base_link to map frame Launch -->
+  <node pkg="autonav" name="initial_pose_broadcaster" type="initial_pose_broadcaster" output="screen" />
+
+  <!-- Load robot_localization ekf_localization_node -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
+    <!-- Set frequency -->
+    <param name="frequency" value="30"/>
+
+    <!-- Provide frames for localization -->
+    <param name="odom_frame" value="odom" />
+    <param name="base_link_frame" value="base_link" />
+    <param name="world_frame" value="odom" />
+    <param name="publish_tf" value="true"/>
+
+
+    <!-- Configure sensor inputs -->
+    <param name="sensor_timeout" value="0.1"/>
+    <param name="two_d_mode" value="true"/>
+
+    <!-- IMU input -->
+    <param name="imu0" value="/imu/data"/>
+    <param name="imu0_remove_gravitational_acceleration" value="true"/>
+    <rosparam param="imu0_config">[false, false, false,
+                                      true, true, true,
+                                      false, false, false,
+                                      false, false, false,
+                                      true,  false,  true]</rosparam>
+    <param name="imu0_queue_size" value="4"/> 
+
+    <!-- Velocity input - DREW SET ANG VEL Z TO FALSE-->
+    <!-- <param name="twist0" value="/pwm_estimates/pwm_twist"/>
+    <rosparam param="twist0_config">[false,  false,  false,
+                                       false, false, false,
+                                       true, false, false,
+                                       false, false, false,
+                                       false, false, false]</rosparam>
+    <param name="twist0_queue_size" value="4" /> -->
+
+    <!-- Set covariances -->
+    <!-- <param name="imu0_linear_acceleration_covariance" value="0.1"/>
+    <param name="imu0_angular_velocity_covariance" value="0.1"/> -->
+    <param name="imu0_orientation_covariance" value="0.5" />
+    <param name="twist0_twist_covariance" value="0.4"/>
+
+    <!-- Set process noise covariances -->
+    <rosparam param="process_noise_covariance">[0.08, 0,    0,    0,    0,    0,
+                                                   0,    0.08, 0,    0,    0,    0,
+                                                   0,    0,    0.06, 0,    0,    0,
+                                                   0,    0,    0,    0.06, 0,    0,
+                                                   0,    0,    0,    0,    0.06, 0,
+                                                   0,    0,    0,    0,    0,    0.06]</rosparam>
+
+    <rosparam param="initial_estimate_covariances">[1e-5, 1e-5, 1e-5, 
+                                                      1e-9, 1e-9, 1e-9, 
+                                                      1e-9, 1e-9, 1e-9, 
+                                                      1e-9, 1e-9, 1e-9, 
+                                                      1e-9, 1e-9, 1e-9]</rosparam>
+  </node>
+</launch>

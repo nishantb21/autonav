@@ -1,0 +1,13 @@
+<launch>
+  <!-- Load depthimage_to_laserscan node -->
+  <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+    <!-- Input and output topics -->
+    <param name="image_topic" value="/camera/depth/image_rect_raw"/>
+    <param name="camera_info_topic" value="/camera/depth/camera_info"/>
+    <param name="scan_topic" value="/camera/depth/laser_scan"/>
+    <!-- Scan configuration -->
+    <param name="output_frame_id" value="/camera_depth_frame"/>
+    <param name="range_min" value="0.5"/>
+    <param name="range_max" value="5.0"/>
+  </node>
+</launch>
