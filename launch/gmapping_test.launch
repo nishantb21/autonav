@@ -19,8 +19,6 @@
         <param name="odom_frame" value="odom"/>
         <param name="map_frame" value="map" />
 
-        <!-- Set the input odometry topic -->
-        <param name="odom_frame" value="odom"/>
 
         <!-- Set optional parameters (you can adjust these based on your needs) -->
         <param name="map_update_interval" value="5.0"/>

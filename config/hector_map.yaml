@@ -1,0 +1,29 @@
+base_frame: base_link
+map_frame: map
+odom_frame: odom
+
+map_resolution: 0.05 # [m]
+map_size: 1024 # The size [number of cells per axis] of the map. The map is square and has (map_size * map_size) grid cells.
+map_start_x: 0.0
+map_start_y: 0.0
+
+map_update_distance_thresh: 0.4 # [m]
+map_update_angle_thresh: 0.9 # [rad]
+map_pub_period: 2.0 # [sec]
+map_multi_res_levels: 3
+
+update_factor_free: 0.4
+update_factor_occupied: 0.9
+
+laser_min_dist: 0.3
+laser_max_dist: 8.0
+laser_z_min_value: -0.5 # [m]
+laser_z_max_value: 1.5 # [m]
+
+pub_map_odom_transform: true
+output_timing: false
+
+scan_subscriber_queue_size: 5
+pub_match_scanmatch_transform: true
+tf_map_scanmatch_transform_frame_name: scanmatcher_frame
+
